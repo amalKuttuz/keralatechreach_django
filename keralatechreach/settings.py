@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-h1lq8-ei0s#**2-%1(*1&)2=27ex)#c4iyv(=g@e@#k1s59rm1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['lms.keralify.com']
 
 
 # Application definition
