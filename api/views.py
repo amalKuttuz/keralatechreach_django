@@ -90,7 +90,7 @@ class DegreesAPIView(APIView):
 class ExamViewAPIView(APIView):
     def get(self, request):
        api_key = request.GET.get('api_key')
-        if api_key != settings.API_SECRET_KEY:
+       if api_key != settings.API_SECRET_KEY:
             return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
 
         required_fields = ['university', 'degree', 'semester', 'admission_year']
