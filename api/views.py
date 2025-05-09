@@ -89,8 +89,8 @@ class DegreesAPIView(APIView):
 
 class ExamViewAPIView(APIView):
     def get(self, request):
-       api_key = request.GET.get('api_key')
-       if api_key != settings.API_SECRET_KEY:
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
             return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
 
         required_fields = ['university', 'degree', 'semester', 'admission_year']
@@ -120,7 +120,7 @@ class ExamViewAPIView(APIView):
 
 class GetJobAPIView(APIView):
     def get(self, request):
-       api_key = request.GET.get('api_key')
+        api_key = request.GET.get('api_key')
         if api_key != settings.API_SECRET_KEY:
             return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -312,12 +312,10 @@ class DistrictListView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-
-
 @api_view(['GET'])
 def events_api(request):
     api_key = request.GET.get('api_key')
-        if api_key != settings.API_SECRET_KEY:
+    if api_key != settings.API_SECRET_KEY:
             return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
     action = request.query_params.get('action')
     last_update = request.query_params.get('lastUpdate', '2025-03-01 00:00:00')
