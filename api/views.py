@@ -20,7 +20,10 @@ from rest_framework.decorators import api_view
 
 class GetPDFAPIView(APIView):
     def get(self, request):
-        
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
+            
         degree = request.GET.get('degree')
         semester = request.GET.get('semester')
 
@@ -37,7 +40,9 @@ class MobileGetPDFAPIView(APIView):
     
 
     def get(self, request):
-
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         degree = request.GET.get('degree')
         semester = request.GET.get('semester')
 
@@ -61,7 +66,9 @@ class MobileGetPDFAPIView(APIView):
 class DegreesAPIView(APIView):
     def get(self, request):
         
-
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         query_type = request.GET.get('type', 'all')
 
         if query_type == 'university':
@@ -82,7 +89,9 @@ class DegreesAPIView(APIView):
 
 class ExamViewAPIView(APIView):
     def get(self, request):
-       
+       api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
 
         required_fields = ['university', 'degree', 'semester', 'admission_year']
         if not all(param in request.GET for param in required_fields):
@@ -111,7 +120,9 @@ class ExamViewAPIView(APIView):
 
 class GetJobAPIView(APIView):
     def get(self, request):
-       
+       api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
 
         jobs = Job.objects.filter(deadline__gte=date.today()).order_by('-created_at')
         serializer = JobSerializer(jobs, many=True)
@@ -120,7 +131,9 @@ class GetJobAPIView(APIView):
 
 class GetJobDetailsAPIView(APIView):
     def get(self, request):
-        
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         job_id = request.GET.get('id')
         if not job_id:
             return Response({'success': False, 'message': 'Job ID is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -143,7 +156,9 @@ from api.auth import validate_api_key
 
 class EventCalendarAPIView(APIView):
     def get(self, request):
-      
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         action = request.query_params.get("action", "getEventDates").lower()
         if action == "geteventdates":
             return self.get_event_dates()
@@ -162,6 +177,9 @@ class EventCalendarAPIView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def get_event_dates(self):
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         query = """
             SELECT e.id, e.category_id, DATE(e.event_start), DATE(e.event_end), e.name, e.place,
                    d.district_id, d.district, c.category
@@ -173,6 +191,9 @@ class EventCalendarAPIView(APIView):
         return self.fetch_and_respond(query)
 
     def get_events_by_id(self, request):
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         event_id = request.query_params.get("id")
         if not event_id:
             return Response({'error': 'Please provide an id'}, status=status.HTTP_400_BAD_REQUEST)
@@ -190,14 +211,23 @@ class EventCalendarAPIView(APIView):
         return self.fetch_and_respond(query, [event_id])
 
     def get_categories(self):
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         query = "SELECT category_id, category FROM event_category ORDER BY category"
         return self.fetch_and_respond(query)
 
     def get_districts(self):
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         query = "SELECT district_id, district FROM districts ORDER BY district"
         return self.fetch_and_respond(query)
 
     def get_filtered_events(self, request):
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         filters = []
         params = []
 
@@ -235,7 +265,9 @@ class EventCalendarAPIView(APIView):
 
 class ContactAPIView(APIView):
     def get(self, request):
-        
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
 
         action = request.query_params.get("action", "").lower()
 
@@ -247,6 +279,7 @@ class ContactAPIView(APIView):
             return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_contact(self):
+        
         query = """
             SELECT c.id, c.name, c.phone, c.email, c.office_name, d.district 
             FROM contacts c
@@ -261,6 +294,7 @@ class ContactAPIView(APIView):
         return Response({"contacts": contacts})
 
     def get_districts(self):
+        
         query = "SELECT district_id as id, district FROM districts ORDER BY district"
         with connection.cursor() as cursor:
             cursor.execute(query)
@@ -282,7 +316,9 @@ class DistrictListView(APIView):
 
 @api_view(['GET'])
 def events_api(request):
-    
+    api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
     action = request.query_params.get('action')
     last_update = request.query_params.get('lastUpdate', '2025-03-01 00:00:00')
 
@@ -314,7 +350,9 @@ def events_api(request):
 
 class InitiativeListView(APIView):
     def get(self, request):
-        
+        api_key = request.GET.get('api_key')
+        if api_key != settings.API_SECRET_KEY:
+            return Response({'error': 'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         initiatives = Initiative.objects.all().order_by('-id')
         serializer = InitiativeSerializer(initiatives, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
