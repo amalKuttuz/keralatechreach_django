@@ -1,9 +1,9 @@
 from django import forms
-from api.models import Question, Event, Contact, Job # or just one for now
+from api.models import ApprovedQuestionPaper, Event, Contact, Job # or just one for now
 
 class QuestionForm(forms.ModelForm):
     class Meta:
-        model = Question
+        model = ApprovedQuestionPaper
         fields = ['question_text'] # adjust based on your model fields
 
 class EventForm(forms.ModelForm):
@@ -11,10 +11,10 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ['title', 'description', 'date']  # adjust as needed
 
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-        fields = ['name', 'email', 'message'] # adjust
+# class ContactForm(forms.ModelForm):
+#     class Meta:
+#         model = Contact
+#         fields = ['name', 'email', 'message'] # adjust
 
 class JobForm(forms.ModelForm):
     class Meta:

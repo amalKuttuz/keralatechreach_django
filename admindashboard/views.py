@@ -12,7 +12,7 @@ def dashboard(request):
 
 @login_required
 def question_list(request):
-    questions = Question.objects.all()
+    questions = ApprovedQuestionPaper.objects.all()
     return render(request, 'admindashboard/questions/list.html', {'questions': questions})
 
 @login_required
@@ -25,7 +25,7 @@ def question_create(request):
 
 @login_required
 def question_edit(request, pk):
-    question = get_object_or_404(Question, pk=pk)
+    question = get_object_or_404(ApprovedQuestionPaper, pk=pk)
     form = QuestionForm(request.POST or None, instance=question)
     if form.is_valid():
         form.save()
@@ -34,7 +34,7 @@ def question_edit(request, pk):
 
 @login_required
 def question_delete(request, pk):
-    question = get_object_or_404(Question, pk=pk)
+    question = get_object_or_404(ApprovedQuestionPaper, pk=pk)
     if request.method == 'POST':
         question.delete()
         return redirect('question_list')
