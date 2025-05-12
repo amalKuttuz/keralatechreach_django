@@ -4,7 +4,7 @@ from api.models import Question, Event, Contact, Job # adjust as needed
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import QuestionForm, EventForm, ContactForm, JobForm
-from api.models import Question, Event, Contact, Job
+from api.models import ApprovedQuestionPaper, Event, Contact, Job
 
 @login_required
 def dashboard(request):
