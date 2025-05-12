@@ -1,10 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from api.models import ApprovedQuestionPaper, Event, Job # adjust as needed
+from api.models import ApprovedQuestionPaper, Event, Job 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import QuestionForm, EventForm, ContactForm, JobForm
-from api.models import ApprovedQuestionPaper, Event, Contact, Job
+from .forms import QuestionForm, EventForm, JobForm
+from api.models import ApprovedQuestionPaper, Event, Job
 
 @login_required
 def dashboard(request):
