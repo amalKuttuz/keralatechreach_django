@@ -1,5 +1,5 @@
 from django import forms
-from api.models import ApprovedQuestionPaper, Event, Contact, Job # or just one for now
+from api.models import ApprovedQuestionPaper, Event, Job 
 
 class QuestionForm(forms.ModelForm):
     class Meta:
