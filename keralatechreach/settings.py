@@ -138,5 +138,15 @@ LOGOUT_REDIRECT_URL = '/admindashboard/login/'
 SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'keralify.com'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'noreply@keralify.com'  # Replace with your Gmail address
+EMAIL_HOST_PASSWORD = 'Asha@2006'  # Replace with your app-specific password
+EMAIL_USE_SSL = True
+EMAIL_TIMEOUT = 10
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

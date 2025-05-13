@@ -1,6 +1,21 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
-from . import views
+from .views.dashboard import dashboard, tables
+from .views.academic import (
+    question_list, question_create, question_edit, question_delete,
+    university_list, university_create, university_edit, university_delete,
+    degree_list, degree_create, degree_edit, degree_delete,
+    exam_list, exam_create, exam_edit, exam_delete
+)
+from .views.content import (
+    news_list, news_create, news_edit, news_delete,
+    event_list, event_create, event_edit, event_delete,
+    gallery_list, gallery_create, gallery_edit, gallery_delete,
+    district_list, district_create, district_edit, district_delete,
+    initiative_list, initiative_create, initiative_edit, initiative_delete
+)
+from .views.users import register, profile, user_list, user_detail, user_delete
+from .views.jobs import job_list, job_create, job_edit, job_delete
 
 app_name = 'admindashboard'
 
@@ -8,63 +23,102 @@ urlpatterns = [
     # Authentication URLs
     path('login/', auth_views.LoginView.as_view(template_name='admindashboard/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='admindashboard:login'), name='logout'),
-    path('register/', views.register, name='register'),
-    path('profile/', views.profile, name='profile'),
+    path('register/', register, name='register'),
+    path('profile/', profile, name='profile'),
     
     # Password Reset URLs
     path('password-reset/',
-         auth_views.PasswordResetView.as_view(template_name='admindashboard/password_reset.html'),
+         auth_views.PasswordResetView.as_view(
+             template_name='admindashboard/password_reset.html',
+             email_template_name='admindashboard/password_reset_email.html',
+             subject_template_name='admindashboard/password_reset_subject.txt',
+             success_url='/admindashboard/password-reset/done/'
+         ),
          name='password_reset'),
     path('password-reset/done/',
-         auth_views.PasswordResetDoneView.as_view(template_name='admindashboard/password_reset_done.html'),
+         auth_views.PasswordResetDoneView.as_view(
+             template_name='admindashboard/password_reset_done.html'
+         ),
          name='password_reset_done'),
-    path('password-reset-confirm/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(template_name='admindashboard/password_reset_confirm.html'),
+    path('reset/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(
+             template_name='admindashboard/password_reset_confirm.html',
+             success_url='/admindashboard/reset/done/'
+         ),
          name='password_reset_confirm'),
-    path('password-reset-complete/',
-         auth_views.PasswordResetCompleteView.as_view(template_name='admindashboard/password_reset_complete.html'),
+    path('reset/done/',
+         auth_views.PasswordResetCompleteView.as_view(
+             template_name='admindashboard/password_reset_complete.html'
+         ),
          name='password_reset_complete'),
     
     # User Management URLs
-    path('users/', views.user_list, name='user_list'),
-    path('users/<int:pk>/', views.user_detail, name='user_detail'),
-    path('users/<int:pk>/delete/', views.user_delete, name='user_delete'),
+    path('users/', user_list, name='user_list'),
+    path('users/<int:pk>/', user_detail, name='user_detail'),
+    path('users/<int:pk>/delete/', user_delete, name='user_delete'),
     
     # Dashboard
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('', dashboard, name='dashboard'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('tables/', tables, name='tables'),
     
     # Question Paper URLs
-    path('questions/', views.question_list, name='question_list'),
-    path('questions/create/', views.question_create, name='question_create'),
-    path('questions/<int:pk>/edit/', views.question_edit, name='question_edit'),
-    path('questions/<int:pk>/delete/', views.question_delete, name='question_delete'),
+    path('questions/', question_list, name='question_list'),
+    path('questions/create/', question_create, name='question_create'),
+    path('questions/<int:pk>/edit/', question_edit, name='question_edit'),
+    path('questions/<int:pk>/delete/', question_delete, name='question_delete'),
     
-    # Event URLs
-    path('events/', views.event_list, name='event_list'),
-    path('events/create/', views.event_create, name='event_create'),
-    path('events/<int:pk>/edit/', views.event_edit, name='event_edit'),
-    path('events/<int:pk>/delete/', views.event_delete, name='event_delete'),
+    # University URLs
+    path('universities/', university_list, name='university_list'),
+    path('universities/create/', university_create, name='university_create'),
+    path('universities/<int:pk>/edit/', university_edit, name='university_edit'),
+    path('universities/<int:pk>/delete/', university_delete, name='university_delete'),
     
-    # News URLs
-    path('news/', views.news_list, name='news_list'),
-    path('news/create/', views.news_create, name='news_create'),
-    path('news/<int:pk>/edit/', views.news_edit, name='news_edit'),
-    path('news/<int:pk>/delete/', views.news_delete, name='news_delete'),
+    # Degree URLs
+    path('degrees/', degree_list, name='degree_list'),
+    path('degrees/create/', degree_create, name='degree_create'),
+    path('degrees/<int:pk>/edit/', degree_edit, name='degree_edit'),
+    path('degrees/<int:pk>/delete/', degree_delete, name='degree_delete'),
+    
+    # Exam URLs
+    path('exams/', exam_list, name='exam_list'),
+    path('exams/create/', exam_create, name='exam_create'),
+    path('exams/<int:pk>/edit/', exam_edit, name='exam_edit'),
+    path('exams/<int:pk>/delete/', exam_delete, name='exam_delete'),
     
     # Job URLs
-    path('jobs/', views.job_list, name='job_list'),
-    path('jobs/create/', views.job_create, name='job_create'),
-    path('jobs/<int:pk>/edit/', views.job_edit, name='job_edit'),
-    path('jobs/<int:pk>/delete/', views.job_delete, name='job_delete'),
+    path('jobs/', job_list, name='job_list'),
+    path('jobs/create/', job_create, name='job_create'),
+    path('jobs/<int:pk>/edit/', job_edit, name='job_edit'),
+    path('jobs/<int:pk>/delete/', job_delete, name='job_delete'),
     
-    # Contact Message URLs
-    path('contacts/', views.contact_list, name='contact_list'),
-    path('contacts/<int:pk>/', views.contact_detail, name='contact_detail'),
-    path('contacts/<int:pk>/delete/', views.contact_delete, name='contact_delete'),
+    # Event URLs
+    path('events/', event_list, name='event_list'),
+    path('events/create/', event_create, name='event_create'),
+    path('events/<int:pk>/edit/', event_edit, name='event_edit'),
+    path('events/<int:pk>/delete/', event_delete, name='event_delete'),
+    
+    # News URLs
+    path('news/', news_list, name='news_list'),
+    path('news/create/', news_create, name='news_create'),
+    path('news/<int:pk>/edit/', news_edit, name='news_edit'),
+    path('news/<int:pk>/delete/', news_delete, name='news_delete'),
+    
+    # District URLs
+    path('districts/', district_list, name='district_list'),
+    path('districts/create/', district_create, name='district_create'),
+    path('districts/<int:pk>/edit/', district_edit, name='district_edit'),
+    path('districts/<int:pk>/delete/', district_delete, name='district_delete'),
+    
+    # Initiative URLs
+    path('initiatives/', initiative_list, name='initiative_list'),
+    path('initiatives/create/', initiative_create, name='initiative_create'),
+    path('initiatives/<int:pk>/edit/', initiative_edit, name='initiative_edit'),
+    path('initiatives/<int:pk>/delete/', initiative_delete, name='initiative_delete'),
     
     # Gallery URLs
-    path('gallery/', views.gallery_list, name='gallery_list'),
-    path('gallery/create/', views.gallery_create, name='gallery_create'),
-    path('gallery/<int:pk>/edit/', views.gallery_edit, name='gallery_edit'),
-    path('gallery/<int:pk>/delete/', views.gallery_delete, name='gallery_delete'),
+    path('gallery/', gallery_list, name='gallery_list'),
+    path('gallery/create/', gallery_create, name='gallery_create'),
+    path('gallery/<int:pk>/edit/', gallery_edit, name='gallery_edit'),
+    path('gallery/<int:pk>/delete/', gallery_delete, name='gallery_delete'),
 ]

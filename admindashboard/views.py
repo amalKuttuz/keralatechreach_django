@@ -333,3 +333,14 @@ def user_delete(request, pk):
         return redirect('admindashboard:user_list')
     
     return render(request, 'admindashboard/user_confirm_delete.html', {'user_profile': user_profile})
+
+@login_required
+def tables(request):
+    context = {
+        'questions': QuestionPaper.objects.all().order_by('-updated_at')[:10],
+        'events': Event.objects.all().order_by('-event_start')[:10],
+        'jobs': Job.objects.all().order_by('-updated_at')[:10],
+        'news': News.objects.all().order_by('-created_at')[:10],
+        'users': UserProfile.objects.all().order_by('-created_at')[:10],
+    }
+    return render(request, 'admindashboard/tables.html', context)

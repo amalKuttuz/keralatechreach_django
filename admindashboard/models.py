@@ -1,6 +1,9 @@
 # api/models.py
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 
 class QuestionPaper(models.Model):
     degree = models.ForeignKey('Degree', on_delete=models.CASCADE)
@@ -54,6 +57,7 @@ class Job(models.Model):
 
 class District(models.Model):
     name = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='created_districts')
     def __str__(self):
         return self.name
@@ -150,7 +154,7 @@ class UserProfile(models.Model):
     email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    created_by = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -161,3 +165,20 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return self.user.username
+
+# Signal to create UserProfile automatically when User is created
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(
+            user=instance,
+            email=instance.email,
+            is_staff=instance.is_staff,
+            is_superuser=instance.is_superuser,
+            is_active=instance.is_active
+        )
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'userprofile'):
+        instance.userprofile.save()

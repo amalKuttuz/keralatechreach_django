@@ -19,28 +19,37 @@
             <div class="card z-index-0 fadeIn3 fadeInBottom">
               <div class="card-header text-center pt-4">
                 <h4>Sign In</h4>
+                <p class="mb-0">Enter your credentials to access the dashboard</p>
               </div>
               <div class="card-body">
-                <form method="POST" action="{% url 'login' %}">
+                <form method="POST" action="{% url 'admindashboard:login' %}">
                   {% csrf_token %}
                   {% if form.errors %}
                     <div class="alert alert-danger text-sm">
                       Invalid username or password.
                     </div>
                   {% endif %}
-                  <div class="mb-3">
-                    <input type="text" name="username" class="form-control" placeholder="Username" required>
+                  <div class="input-group input-group-static mb-3">
+                    <label>Username</label>
+                    <input type="text" name="username" class="form-control" required>
                   </div>
-                  <div class="mb-3">
-                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                  <div class="input-group input-group-static mb-3">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" required>
                   </div>
                   <div class="text-center">
-                    <button type="submit" class="btn bg-gradient-primary w-100 my-4 mb-2">Login</button>
+                    <button type="submit" class="btn bg-gradient-primary w-100 my-4 mb-2">Sign in</button>
                   </div>
                 </form>
               </div>
               <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                <small class="text-muted">Forgot your password? Reset it via the Django admin.</small>
+                <p class="mb-4 text-sm mx-auto">
+                  Don't have an account?
+                  <a href="{% url 'admindashboard:register' %}" class="text-primary text-gradient font-weight-bold">Sign up</a>
+                </p>
+                <p class="mb-0 text-sm">
+                  <a href="{% url 'admindashboard:password_reset' %}" class="text-dark font-weight-bold">Forgot password?</a>
+                </p>
               </div>
             </div>
           </div>

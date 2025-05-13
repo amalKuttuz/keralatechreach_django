@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 
 urlpatterns = [
     # Django default admin
@@ -15,7 +16,7 @@ urlpatterns = [
     path('admindashboard/', include('admindashboard.urls')),
     
     # Redirect root to admin dashboard login
-    path('', auth_views.RedirectView.as_view(url='/admindashboard/login/', permanent=False), name='root'),
+    path('', RedirectView.as_view(url='/admindashboard/login/', permanent=False), name='root'),
 ]
 
 # Serve media and static files during development
