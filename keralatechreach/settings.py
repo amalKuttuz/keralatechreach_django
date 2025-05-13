@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-h1lq8-ei0s#**2-%1(*1&)2=27ex)#c4iyv(=g@e@#k1s59rm1
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['lms.keralify.com']
+ALLOWED_HOSTS = ['lms.keralify.com','localhost','127.0.0.1']
 
 
 # Application definition
@@ -119,16 +119,24 @@ USE_TZ = True
 API_SECRET_KEY = '7f2ff333-df7e-4f59-be36-f2d7f6ed230f'  # Load from .env in production!
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
-LOGIN_URL = '/admin/login/'
-LOGIN_REDIRECT_URL = '/admin/dashboard/'
-LOGOUT_REDIRECT_URL = '/admin/login/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# Authentication settings
+LOGIN_URL = '/admindashboard/login/'
+LOGIN_REDIRECT_URL = '/admindashboard/dashboard/'
+LOGOUT_REDIRECT_URL = '/admindashboard/login/'
 
+# Session settings
+SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
