@@ -3,13 +3,12 @@
 from django.db import models
 
 class ApprovedQuestionPaper(models.Model):
-    degree = models.CharField(max_length=200)
+    degree = models.ForeignKey('Degree', on_delete=models.CASCADE)
     semester = models.PositiveIntegerField()
     subject = models.CharField(max_length=200)
     file_path = models.CharField(max_length=200)  # renamed from qtext
     year = models.PositiveIntegerField()
-    question_id = models.IntegerField()
-    university_id = models.IntegerField()
+    university_id = models.ForeignKey('University', on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
