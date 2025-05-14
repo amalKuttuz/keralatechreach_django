@@ -9,9 +9,6 @@ urlpatterns = [
     # Django default admin
     path('admin/', admin.site.urls),
     
-    # API URLs
-    path('api/', include('api.urls')),
-    
     # Admin Dashboard URLs
     path('admindashboard/', include('admindashboard.urls')),
     

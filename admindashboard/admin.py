@@ -4,8 +4,6 @@ from .models import (
     Initiative, EventCategory, Event, News, ContactMessage,
     Gallery, SiteSetting, UserProfile
 )
-from .monitoring.models import UserActivity, SystemMetrics
-from .notifications.models import AdminNotification
 
 @admin.register(QuestionPaper)
 class QuestionPaperAdmin(admin.ModelAdmin):
@@ -100,23 +98,3 @@ class UserProfileAdmin(admin.ModelAdmin):
     )
     search_fields = ('user__username', 'email', 'phone', 'bio')
     list_editable = ('is_active', 'is_verified', 'is_approved')
-
-@admin.register(UserActivity)
-class UserActivityAdmin(admin.ModelAdmin):
-    list_display = ('user', 'action', 'resource', 'ip_address', 'timestamp')
-    list_filter = ('action', 'timestamp')
-    search_fields = ('user__username', 'resource', 'ip_address')
-    readonly_fields = ('timestamp',)
-
-@admin.register(SystemMetrics)
-class SystemMetricsAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'cpu_usage', 'memory_usage', 'disk_usage', 'active_users')
-    list_filter = ('timestamp',)
-    readonly_fields = ('timestamp',)
-
-@admin.register(AdminNotification)
-class AdminNotificationAdmin(admin.ModelAdmin):
-    list_display = ('title', 'level', 'notification_type', 'created_at')
-    list_filter = ('level', 'notification_type', 'created_at')
-    search_fields = ('title', 'message')
-    readonly_fields = ('created_at',)
