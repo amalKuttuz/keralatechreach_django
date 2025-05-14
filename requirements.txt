@@ -6,4 +6,7 @@ psutil>=5.9.0
 Pillow>=9.5.0
 django-filter>=23.2
 django-cors-headers>=4.0.0
-python-dotenv>=1.0.0 
+python-dotenv>=1.0.0
+channels-redis==4.1.0
+django-redis==5.4.0
+redis==5.0.1 

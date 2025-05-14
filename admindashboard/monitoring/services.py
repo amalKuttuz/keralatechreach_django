@@ -1,4 +1,6 @@
-import psutil
+import os
+import resource
+import time
 from django.core.cache import cache
 from django.db import connection
 from django.utils import timezone
@@ -20,12 +22,21 @@ class SystemMonitor:
         }
 
     def collect_metrics(self):
-        """Collect current system metrics"""
+        """Collect current system metrics using cPanel-friendly methods"""
         try:
+            # Get memory usage from resource module
+            memory_usage = self._get_memory_usage()
+            
+            # Get disk usage for the current directory
+            disk_usage = self._get_disk_usage()
+            
+            # Get CPU load from /proc/loadavg if available, otherwise estimate
+            cpu_usage = self._get_cpu_usage()
+            
             metrics = {
-                'cpu_usage': psutil.cpu_percent(interval=1),
-                'memory_usage': psutil.virtual_memory().percent,
-                'disk_usage': psutil.disk_usage('/').percent,
+                'cpu_usage': cpu_usage,
+                'memory_usage': memory_usage,
+                'disk_usage': disk_usage,
                 'response_time': self._get_average_response_time(),
                 'active_users': self._get_active_users_count(),
                 'error_count': self._get_error_count()
@@ -41,6 +52,54 @@ class SystemMonitor:
         except Exception as e:
             logger.error(f"Error collecting system metrics: {str(e)}")
             return None
+
+    def _get_memory_usage(self):
+        """Get memory usage using resource module"""
+        try:
+            usage = resource.getrusage(resource.RUSAGE_SELF)
+            # Convert to percentage based on cPanel memory limit
+            memory_limit = int(os.getenv('MEMORY_LIMIT_IN_BYTES', 256 * 1024 * 1024))  # Default 256MB
+            memory_usage = (usage.ru_maxrss * 1024 * 100) / memory_limit
+            return min(memory_usage, 100)
+        except Exception as e:
+            logger.warning(f"Could not get memory usage: {str(e)}")
+            return 0
+
+    def _get_disk_usage(self):
+        """Get disk usage for the current directory"""
+        try:
+            stat = os.statvfs('.')
+            total = stat.f_blocks * stat.f_frsize
+            free = stat.f_bfree * stat.f_frsize
+            used = total - free
+            return (used * 100) / total
+        except Exception as e:
+            logger.warning(f"Could not get disk usage: {str(e)}")
+            return 0
+
+    def _get_cpu_usage(self):
+        """Get CPU usage estimate"""
+        try:
+            # Try to read from /proc/loadavg first
+            if os.path.exists('/proc/loadavg'):
+                with open('/proc/loadavg', 'r') as f:
+                    load = float(f.read().split()[0])
+                    # Convert load average to percentage (assume load of 1 = 100%)
+                    return min(load * 100, 100)
+            else:
+                # Fallback to basic CPU time measurement
+                start_time = time.time()
+                start_cpu = time.clock()
+                # Perform some computation
+                for i in range(1000000):
+                    _ = i * i
+                end_cpu = time.clock()
+                end_time = time.time()
+                cpu_usage = ((end_cpu - start_cpu) / (end_time - start_time)) * 100
+                return min(cpu_usage, 100)
+        except Exception as e:
+            logger.warning(f"Could not get CPU usage: {str(e)}")
+            return 0
 
     def _get_average_response_time(self):
         """Get average response time from cache"""
@@ -58,7 +117,6 @@ class SystemMonitor:
 
     def _get_error_count(self):
         """Get error count from the last hour"""
-        one_hour_ago = timezone.now() - timedelta(hours=1)
         return cache.get('error_count', 0)
 
     def _check_alerts(self, metrics):
