@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'admindashboard',
+    'channels',  # Add channels for WebSocket support
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'admindashboard.middleware.activity.UserActivityMiddleware',  # Updated path
 ]
 
 ROOT_URLCONF = 'keralatechreach.urls'
@@ -140,13 +142,69 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'keralify.com'
-EMAIL_PORT = 465
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'noreply@keralify.com'  # Replace with your Gmail address
-EMAIL_HOST_PASSWORD = 'Asha@2006'  # Replace with your app-specific password
+EMAIL_HOST_USER = 'your-email@gmail.com'  # Update with your email
+EMAIL_HOST_PASSWORD = 'your-password'      # Update with your password
 EMAIL_USE_SSL = True
 EMAIL_TIMEOUT = 10
+DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Channels configuration
+ASGI_APPLICATION = 'keralatechreach.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
+# Monitoring settings
+MONITORING = {
+    'METRICS_INTERVAL': 60,  # Collect metrics every 60 seconds
+    'RETENTION_DAYS': 30,    # Keep metrics for 30 days
+    'ALERT_THRESHOLDS': {
+        'cpu_usage': 80,
+        'memory_usage': 85,
+        'disk_usage': 90,
+        'response_time': 2,
+        'error_rate': 5
+    }
+}
+
+# Cache configuration for rate limiting and metrics
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'admindashboard': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

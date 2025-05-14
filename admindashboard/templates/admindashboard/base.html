@@ -116,7 +116,37 @@
         </li>
 
         <li class="nav-item mt-4 mb-2">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Monitoring</h6>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link {% if request.resolver_match.url_name == 'monitoring' %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:monitoring' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">monitoring</i>
+            </div>
+            <span class="nav-link-text ms-1">System Monitoring</span>
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:notifications' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">notifications</i>
+              <span class="notification-badge position-absolute top-0 end-0 bg-danger rounded-circle" style="width: 8px; height: 8px; display: none;"></span>
+            </div>
+            <span class="nav-link-text ms-1">Notifications</span>
+            <span class="notification-count badge bg-gradient-primary ms-auto" style="display: none;">0</span>
+          </a>
+        </li>
+
+        <li class="nav-item mt-4 mb-2">
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Settings</h6>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:user_list' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">group</i>
+            </div>
+            <span class="nav-link-text ms-1">Users</span>
+          </a>
         </li>
         <li class="nav-item mb-2">
           <a class="nav-link {% if 'district' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:district_list' %}">
@@ -146,9 +176,6 @@
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">
       <div class="mx-3">
-        <a class="btn bg-gradient-dark w-100 mb-3" href="{% url 'admindashboard:logout' %}" type="button">
-          <i class="material-symbols-rounded opacity-10 me-2">logout</i> Logout
-        </a>
       </div>
     </div>
   </aside>
@@ -592,6 +619,40 @@
     });
   </script>
   <script>
+    // Initialize mobile sidebar functionality
+    document.addEventListener("DOMContentLoaded", function() {
+      const iconNavbarSidenav = document.getElementById('iconNavbarSidenav');
+      const iconSidenav = document.getElementById('iconSidenav');
+      const sidenav = document.getElementById('sidenav-main');
+      const body = document.getElementsByTagName('body')[0];
+      const className = 'g-sidenav-pinned';
+
+      function toggleSidenav() {
+        if (body.classList.contains(className)) {
+          body.classList.remove(className);
+        } else {
+          body.classList.add(className);
+        }
+      }
+
+      if (iconNavbarSidenav) {
+        iconNavbarSidenav.addEventListener("click", toggleSidenav);
+      }
+
+      if (iconSidenav) {
+        iconSidenav.addEventListener("click", toggleSidenav);
+      }
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 767.98) {
+          if (!sidenav.contains(e.target) && !iconNavbarSidenav.contains(e.target)) {
+            body.classList.remove(className);
+          }
+        }
+      });
+    });
+
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
       var options = {
@@ -602,6 +663,43 @@
   </script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{% static 'assets/js/material-dashboard.min.js?v=3.2.0' %}"></script>
+  <script>
+    // Handle unread notifications in sidebar
+    function updateNotificationCount() {
+        fetch('/admindashboard/api/dashboard/notifications/?unread_only=true')
+            .then(response => response.json())
+            .then(data => {
+                const count = data.length;
+                const badge = document.querySelector('.notification-badge');
+                const countElement = document.querySelector('.notification-count');
+                
+                if (count > 0) {
+                    badge.style.display = 'block';
+                    countElement.style.display = 'inline-block';
+                    countElement.textContent = count;
+                } else {
+                    badge.style.display = 'none';
+                    countElement.style.display = 'none';
+                }
+            });
+    }
+
+    // Update notification count every minute
+    updateNotificationCount();
+    setInterval(updateNotificationCount, 60000);
+
+    // WebSocket connection for real-time notification updates
+    const sidebarSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/dashboard/'
+    );
+
+    sidebarSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'notification.message') {
+            updateNotificationCount();
+        }
+    };
+  </script>
 </body>
 {% block extra_js %}
 <style>
@@ -623,6 +721,34 @@
 
   .footer {
     margin-top: auto;
+  }
+
+  /* Mobile sidebar fixes */
+  @media (max-width: 767.98px) {
+    .g-sidenav-show:not(.g-sidenav-pinned) .sidenav {
+      transform: translateX(-17.125rem);
+    }
+    
+    .g-sidenav-show.g-sidenav-pinned .sidenav {
+      transform: translateX(0);
+    }
+    
+    .sidenav {
+      z-index: 1500;
+      transition: transform 0.4s ease;
+    }
+  }
+
+  .navbar-vertical.navbar-expand-xs {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 15.625rem !important;
+    overflow-y: auto;
+    padding: 0;
+    box-shadow: none;
   }
 </style>
 {% endblock extra_js %}

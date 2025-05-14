@@ -15,6 +15,8 @@ from .forms import (
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.contrib.auth.mixins import LoginRequiredMixin, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 
 @login_required
 def dashboard(request):
@@ -344,3 +346,53 @@ def tables(request):
         'users': UserProfile.objects.all().order_by('-created_at')[:10],
     }
     return render(request, 'admindashboard/tables.html', context)
+
+class UserListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'admindashboard/user/list.html'
+    context_object_name = 'users'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return User.objects.all().order_by('-date_joined')
+
+class UserCreateView(LoginRequiredMixin, CreateView):
+    model = User
+    template_name = 'admindashboard/user/form.html'
+    form_class = UserCreationForm
+    success_url = reverse_lazy('admindashboard:user_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Add New User'
+        context['button_text'] = 'Create User'
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'User created successfully.')
+        return super().form_valid(form)
+
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = 'admindashboard/user/form.html'
+    form_class = UserChangeForm
+    success_url = reverse_lazy('admindashboard:user_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit User'
+        context['button_text'] = 'Update User'
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'User updated successfully.')
+        return super().form_valid(form)
+
+class UserDeleteView(LoginRequiredMixin, DeleteView):
+    model = User
+    template_name = 'admindashboard/user/delete.html'
+    success_url = reverse_lazy('admindashboard:user_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'User deleted successfully.')
+        return super().delete(request, *args, **kwargs)

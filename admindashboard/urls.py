@@ -1,6 +1,12 @@
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views.dashboard import dashboard, tables
+from .views.monitoring import monitoring_dashboard, notifications_list
+from .views.users import (
+    register, profile, user_list, user_detail, user_delete,
+    UserListView, UserCreateView, UserUpdateView, UserDeleteView
+)
 from .views.academic import (
     question_list, question_create, question_edit, question_delete,
     university_list, university_create, university_edit, university_delete,
@@ -14,10 +20,13 @@ from .views.content import (
     district_list, district_create, district_edit, district_delete,
     initiative_list, initiative_create, initiative_edit, initiative_delete
 )
-from .views.users import register, profile, user_list, user_detail, user_delete
 from .views.jobs import job_list, job_create, job_edit, job_delete
+from .api.views import DashboardViewSet
 
 app_name = 'admindashboard'
+
+router = DefaultRouter()
+router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 
 urlpatterns = [
     # Authentication URLs
@@ -52,10 +61,11 @@ urlpatterns = [
          ),
          name='password_reset_complete'),
     
-    # User Management URLs
-    path('users/', user_list, name='user_list'),
-    path('users/<int:pk>/', user_detail, name='user_detail'),
-    path('users/<int:pk>/delete/', user_delete, name='user_delete'),
+    # User Management
+    path('users/', UserListView.as_view(), name='user_list'),
+    path('users/add/', UserCreateView.as_view(), name='user_create'),
+    path('users/<int:pk>/edit/', UserUpdateView.as_view(), name='user_update'),
+    path('users/<int:pk>/delete/', UserDeleteView.as_view(), name='user_delete'),
     
     # Dashboard
     path('', dashboard, name='dashboard'),
@@ -121,4 +131,16 @@ urlpatterns = [
     path('gallery/create/', gallery_create, name='gallery_create'),
     path('gallery/<int:pk>/edit/', gallery_edit, name='gallery_edit'),
     path('gallery/<int:pk>/delete/', gallery_delete, name='gallery_delete'),
+    
+    # Monitoring URLs
+    path('monitoring/', monitoring_dashboard, name='monitoring'),
+    path('notifications/', notifications_list, name='notifications'),
+    
+    # API endpoints for monitoring
+    path('api/dashboard/system_metrics/', DashboardViewSet.as_view({'get': 'system_metrics'}), name='api_system_metrics'),
+    path('api/dashboard/activity_feed/', DashboardViewSet.as_view({'get': 'activity_feed'}), name='api_activity_feed'),
+    path('api/dashboard/notifications/', DashboardViewSet.as_view({'get': 'notifications'}), name='api_notifications'),
+    path('api/dashboard/mark_notification_read/<int:pk>/', DashboardViewSet.as_view({'post': 'mark_notification_read'}), name='api_mark_notification_read'),
+    # API endpoints
+    path('api/', include(router.urls)),
 ]
