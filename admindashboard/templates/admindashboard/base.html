@@ -43,6 +43,7 @@
           </a>
         </li>
         
+        {% if user.is_staff %}
         <li class="nav-item mt-4 mb-2">
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Academic</h6>
         </li>
@@ -119,6 +120,14 @@
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Settings</h6>
         </li>
         <li class="nav-item mb-2">
+          <a class="nav-link {% if 'activity-log' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:activity_log' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">history</i>
+            </div>
+            <span class="nav-link-text ms-1">Activity Log</span>
+          </a>
+        </li>
+        <li class="nav-item mb-2">
           <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:user_list' %}">
             <div class="text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-symbols-rounded opacity-10">group</i>
@@ -142,6 +151,8 @@
             <span class="nav-link-text ms-1">Initiatives</span>
           </a>
         </li>
+        {% endif %}
+        
         <li class="nav-item mb-2">
           <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:profile' %}">
             <div class="text-center me-2 d-flex align-items-center justify-content-center">
@@ -154,7 +165,7 @@
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">
       <div class="mx-3">
-        <a class="btn bg-gradient-dark w-100 mb-3" href="{% url 'admindashboard:logout' %}" type="button">
+        <a href="{% url 'admindashboard:logout' %}" class="btn bg-gradient-dark w-100 mb-3">
           <i class="material-symbols-rounded opacity-10 me-2">logout</i> Logout
         </a>
       </div>

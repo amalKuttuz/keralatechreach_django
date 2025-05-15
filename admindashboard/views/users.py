@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -12,6 +12,9 @@ from ..forms import (
     CustomUserCreationForm, CustomUserChangeForm,
     UserProfileForm, UserProfileUpdateForm, UserManagementForm
 )
+from ..mixins import StaffRequiredMixin
+from ..decorators import staff_required
+from .activity_log import log_activity
 
 def register(request):
     if request.method == 'POST':
@@ -23,6 +26,12 @@ def register(request):
                 UserProfile.objects.create(
                     user=user,
                     email=form.cleaned_data['email']
+                )
+                log_activity(
+                    user=request.user if request.user.is_authenticated else user,
+                    action="User registration",
+                    details=f"New user registered: {user.username}",
+                    request=request
                 )
                 messages.success(request, 'Registration successful. You can now login.')
                 return redirect('admindashboard:login')
@@ -36,35 +45,62 @@ def profile(request):
         form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated profile",
+                details="Updated user profile information",
+                request=request
+            )
             messages.success(request, 'Your profile has been updated.')
             return redirect('admindashboard:profile')
     else:
         form = UserProfileForm(instance=request.user.userprofile)
-    return render(request, 'admindashboard/users/profile.html', {'form': form})
+    return render(request, 'admindashboard/profile.html', {'form': form})
 
 @login_required
+@staff_required
 def user_list(request):
-    User = get_user_model()
-    users = User.objects.select_related('userprofile').all()
+    users = User.objects.all().order_by('-date_joined')
     return render(request, 'admindashboard/users/list.html', {'users': users})
 
 @login_required
+@staff_required
 def user_detail(request, pk):
-    User = get_user_model()
-    user = get_object_or_404(User.objects.select_related('userprofile'), pk=pk)
-    return render(request, 'admindashboard/users/detail.html', {'user_detail': user})
-
-@login_required
-def user_delete(request, pk):
-    User = get_user_model()
     user = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
+        form = UserManagementForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            log_activity(
+                user=request.user,
+                action="Updated user",
+                details=f"Updated user details for: {user.username}",
+                request=request
+            )
+            messages.success(request, 'User updated successfully.')
+            return redirect('admindashboard:user_list')
+    else:
+        form = UserManagementForm(instance=user)
+    return render(request, 'admindashboard/users/detail.html', {'form': form, 'user_obj': user})
+
+@login_required
+@staff_required
+def user_delete(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        username = user.username
         user.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted user",
+            details=f"Deleted user: {username}",
+            request=request
+        )
         messages.success(request, 'User deleted successfully.')
         return redirect('admindashboard:user_list')
     return render(request, 'admindashboard/users/delete.html', {'user': user})
 
-class UserListView(LoginRequiredMixin, ListView):
+class UserListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     model = User
     template_name = 'admindashboard/user/list.html'
     context_object_name = 'users'
@@ -73,7 +109,7 @@ class UserListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return User.objects.all().order_by('-date_joined')
 
-class UserCreateView(LoginRequiredMixin, CreateView):
+class UserCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     model = User
     template_name = 'admindashboard/user/form.html'
     form_class = CustomUserCreationForm
@@ -89,7 +125,7 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'User created successfully.')
         return super().form_valid(form)
 
-class UserUpdateView(LoginRequiredMixin, UpdateView):
+class UserUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
     model = User
     template_name = 'admindashboard/user/form.html'
     form_class = CustomUserChangeForm
@@ -105,11 +141,22 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'User updated successfully.')
         return super().form_valid(form)
 
-class UserDeleteView(LoginRequiredMixin, DeleteView):
+class UserDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
     model = User
     template_name = 'admindashboard/user/delete.html'
     success_url = reverse_lazy('admindashboard:user_list')
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'User deleted successfully.')
-        return super().delete(request, *args, **kwargs) 
+        return super().delete(request, *args, **kwargs)
+
+def custom_logout(request):
+    if request.user.is_authenticated:
+        log_activity(
+            user=request.user,
+            action="User logout",
+            details=f"User logged out: {request.user.username}",
+            request=request
+        )
+        logout(request)
+    return redirect('admindashboard:login') 

@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class QuestionPaper(models.Model):
     degree = models.ForeignKey('Degree', on_delete=models.CASCADE)
@@ -182,3 +183,86 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'userprofile'):
         instance.userprofile.save()
+
+class ActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    action = models.CharField(max_length=255)
+    details = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        
+    def __str__(self):
+        return f"{self.user.username} - {self.action} - {self.timestamp}"
+
+class Note(models.Model):
+    title = models.CharField(max_length=255)
+    module = models.CharField(max_length=255)
+    degree = models.ForeignKey('Degree', on_delete=models.CASCADE)
+    semester = models.PositiveIntegerField()
+    year = models.PositiveIntegerField()
+    university = models.ForeignKey('University', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='notes/')
+    uploaded_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Note: {self.title} ({self.university} - {self.degree} Sem {self.semester})"
+
+class EntranceNotification(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    deadline = models.DateField()
+    link = models.URLField(blank=True, null=True)
+    published_date = models.DateField(default=timezone.now)
+    is_published = models.BooleanField(default=False)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+# Affiliate Marketing Models
+class AffiliateCategory(models.Model):
+    name = models.CharField(max_length=255)
+    image_url = models.URLField(blank=True, null=True)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class AffiliateBudgetSelection(models.Model):
+    title = models.CharField(max_length=255)
+    category = models.ForeignKey(AffiliateCategory, on_delete=models.CASCADE)
+    budget_limit = models.DecimalField(max_digits=10, decimal_places=2)
+    image_url = models.URLField(blank=True, null=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.title} ({self.category.name})"
+
+class AffiliateSliderItem(models.Model):
+    image_url = models.URLField()
+    redirect_url = models.URLField(blank=True, null=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Slider Item {self.display_order}"
+
+class AffiliateProduct(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    category = models.ForeignKey(AffiliateCategory, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    image_url = models.URLField(blank=True, null=True)
+    affiliate_url = models.URLField()
+    affiliate_code = models.CharField(max_length=255, blank=True, null=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title

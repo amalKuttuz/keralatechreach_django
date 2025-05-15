@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ..models import Job
 from ..forms import JobForm
+from .activity_log import log_activity
 
 @login_required
 def job_list(request):
@@ -17,6 +18,12 @@ def job_create(request):
             job = form.save(commit=False)
             job.created_by = request.user.userprofile
             job.save()
+            log_activity(
+                user=request.user,
+                action="Created job posting",
+                details=f"Created job posting: {job.title}",
+                request=request
+            )
             messages.success(request, 'Job posting created successfully.')
             return redirect('admindashboard:job_list')
     else:
@@ -33,6 +40,12 @@ def job_edit(request, pk):
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated job posting",
+                details=f"Updated job posting: {job.title}",
+                request=request
+            )
             messages.success(request, 'Job posting updated successfully.')
             return redirect('admindashboard:job_list')
     else:
@@ -47,7 +60,14 @@ def job_edit(request, pk):
 def job_delete(request, pk):
     job = get_object_or_404(Job, pk=pk)
     if request.method == 'POST':
+        title = job.title
         job.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted job posting",
+            details=f"Deleted job posting: {title}",
+            request=request
+        )
         messages.success(request, 'Job posting deleted successfully.')
         return redirect('admindashboard:job_list')
     return render(request, 'admindashboard/jobs/delete.html', {'job': job}) 

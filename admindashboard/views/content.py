@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ..models import News, Event, Gallery, EventCategory, District, Initiative
 from ..forms import NewsForm, EventForm, GalleryForm, EventCategoryForm, DistrictForm, InitiativeForm
+from .activity_log import log_activity
 
 # News Views
 @login_required
@@ -22,6 +23,12 @@ def news_create(request):
             news = form.save(commit=False)
             news.created_by = request.user.userprofile
             news.save()
+            log_activity(
+                user=request.user,
+                action="Created news article",
+                details=f"Created news article: {news.title}",
+                request=request
+            )
             messages.success(request, 'News article created successfully.')
             return redirect('admindashboard:news_list')
     else:
@@ -38,20 +45,34 @@ def news_edit(request, pk):
         form = NewsForm(request.POST, request.FILES, instance=news)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated news article",
+                details=f"Updated news article: {news.title}",
+                request=request
+            )
             messages.success(request, 'News article updated successfully.')
             return redirect('admindashboard:news_list')
     else:
         form = NewsForm(instance=news)
     return render(request, 'admindashboard/news/form.html', {
         'form': form,
-        'title': 'Edit News Article'
+        'title': 'Edit News Article',
+        'news': news
     })
 
 @login_required
 def news_delete(request, pk):
     news = get_object_or_404(News, pk=pk)
     if request.method == 'POST':
+        title = news.title
         news.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted news article",
+            details=f"Deleted news article: {title}",
+            request=request
+        )
         messages.success(request, 'News article deleted successfully.')
         return redirect('admindashboard:news_list')
     return render(request, 'admindashboard/news/delete.html', {'news': news})
@@ -74,6 +95,12 @@ def event_create(request):
             event = form.save(commit=False)
             event.created_by = request.user.userprofile
             event.save()
+            log_activity(
+                user=request.user,
+                action="Created event",
+                details=f"Created event: {event.name}",
+                request=request
+            )
             messages.success(request, 'Event created successfully.')
             return redirect('admindashboard:event_list')
     else:
@@ -90,6 +117,12 @@ def event_edit(request, pk):
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated event",
+                details=f"Updated event: {event.name}",
+                request=request
+            )
             messages.success(request, 'Event updated successfully.')
             return redirect('admindashboard:event_list')
     else:
@@ -103,7 +136,14 @@ def event_edit(request, pk):
 def event_delete(request, pk):
     event = get_object_or_404(Event, pk=pk)
     if request.method == 'POST':
+        name = event.name
         event.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted event",
+            details=f"Deleted event: {name}",
+            request=request
+        )
         messages.success(request, 'Event deleted successfully.')
         return redirect('admindashboard:event_list')
     return render(request, 'admindashboard/event/delete.html', {'event': event})

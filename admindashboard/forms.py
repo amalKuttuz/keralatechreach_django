@@ -171,8 +171,13 @@ class CustomUserCreationForm(UserCreationForm):
             if field_name not in ['is_staff', 'is_active']:
                 field.widget.attrs.update({
                     'class': 'form-control',
-                    'placeholder': field.label
+                    'placeholder': '',  # Remove placeholder to avoid overlap with label
                 })
+            # Add help text for password fields
+            if field_name == 'password1':
+                field.help_text = 'Your password must contain at least 8 characters.'
+            elif field_name == 'password2':
+                field.help_text = 'Enter the same password as before, for verification.'
 
 class CustomUserChangeForm(UserChangeForm):
     email = forms.EmailField(required=True)
@@ -192,7 +197,7 @@ class CustomUserChangeForm(UserChangeForm):
             if field_name not in ['is_staff', 'is_active']:
                 field.widget.attrs.update({
                     'class': 'form-control',
-                    'placeholder': field.label
+                    'placeholder': '',  # Remove placeholder to avoid overlap with label
                 })
 
 class UserProfileForm(forms.ModelForm):

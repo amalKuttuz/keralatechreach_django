@@ -16,16 +16,18 @@ from .views.content import (
 )
 from .views.users import (
     register, profile, user_list, user_detail, user_delete,
-    UserListView, UserCreateView, UserUpdateView, UserDeleteView
+    UserListView, UserCreateView, UserUpdateView, UserDeleteView,
+    custom_logout
 )
 from .views.jobs import job_list, job_create, job_edit, job_delete
+from .views.activity_log import activity_log_view
 
 app_name = 'admindashboard'
 
 urlpatterns = [
     # Authentication URLs
     path('login/', auth_views.LoginView.as_view(template_name='admindashboard/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='admindashboard:login'), name='logout'),
+    path('logout/', custom_logout, name='logout'),
     path('register/', register, name='register'),
     path('profile/', profile, name='profile'),
     
@@ -125,4 +127,6 @@ urlpatterns = [
     path('gallery/create/', gallery_create, name='gallery_create'),
     path('gallery/<int:pk>/edit/', gallery_edit, name='gallery_edit'),
     path('gallery/<int:pk>/delete/', gallery_delete, name='gallery_delete'),
+    
+    path('activity-log/', activity_log_view, name='activity_log'),
 ]

@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ..models import QuestionPaper, University, Degree, Exam
 from ..forms import QuestionPaperForm, UniversityForm, DegreeForm, ExamForm
+from .activity_log import log_activity
 
 # QuestionPaper Views
 @login_required
@@ -22,7 +23,13 @@ def question_create(request):
             question = form.save(commit=False)
             question.created_by = request.user.userprofile
             question.save()
-            messages.success(request, 'Question paper added successfully.')
+            log_activity(
+                user=request.user,
+                action="Created question paper",
+                details=f"Created question paper for {question.subject} - {question.degree}",
+                request=request
+            )
+            messages.success(request, 'Question paper created successfully.')
             return redirect('admindashboard:question_list')
     else:
         form = QuestionPaperForm()
@@ -39,6 +46,12 @@ def question_edit(request, pk):
         form = QuestionPaperForm(request.POST, request.FILES, instance=question)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated question paper",
+                details=f"Updated question paper for {question.subject} - {question.degree}",
+                request=request
+            )
             messages.success(request, 'Question paper updated successfully.')
             return redirect('admindashboard:question_list')
     else:
@@ -53,11 +66,16 @@ def question_edit(request, pk):
 @login_required
 def question_delete(request, pk):
     question = get_object_or_404(QuestionPaper, pk=pk)
-    if request.method == 'POST':
-        question.delete()
-        messages.success(request, 'Question paper deleted successfully.')
-        return redirect('admindashboard:question_list')
-    return render(request, 'admindashboard/academic/question_delete.html', {'question': question})
+    details = f"Deleted question paper for {question.subject} - {question.degree}"
+    question.delete()
+    log_activity(
+        user=request.user,
+        action="Deleted question paper",
+        details=details,
+        request=request
+    )
+    messages.success(request, 'Question paper deleted successfully.')
+    return redirect('admindashboard:question_list')
 
 # University Views
 @login_required
@@ -73,6 +91,12 @@ def university_create(request):
             university = form.save(commit=False)
             university.created_by = request.user.userprofile
             university.save()
+            log_activity(
+                user=request.user,
+                action="Created university",
+                details=f"Created university: {university.name}",
+                request=request
+            )
             messages.success(request, 'University created successfully.')
             return redirect('admindashboard:university_list')
     else:
@@ -89,6 +113,12 @@ def university_edit(request, pk):
         form = UniversityForm(request.POST, instance=university)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated university",
+                details=f"Updated university: {university.name}",
+                request=request
+            )
             messages.success(request, 'University updated successfully.')
             return redirect('admindashboard:university_list')
     else:
@@ -102,7 +132,14 @@ def university_edit(request, pk):
 def university_delete(request, pk):
     university = get_object_or_404(University, pk=pk)
     if request.method == 'POST':
+        name = university.name
         university.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted university",
+            details=f"Deleted university: {name}",
+            request=request
+        )
         messages.success(request, 'University deleted successfully.')
         return redirect('admindashboard:university_list')
     return render(request, 'admindashboard/university/delete.html', {'university': university})
@@ -169,6 +206,12 @@ def exam_create(request):
             exam = form.save(commit=False)
             exam.created_by = request.user.userprofile
             exam.save()
+            log_activity(
+                user=request.user,
+                action="Created exam",
+                details=f"Created exam: {exam.exam_name}",
+                request=request
+            )
             messages.success(request, 'Exam created successfully.')
             return redirect('admindashboard:exam_list')
     else:
@@ -185,6 +228,12 @@ def exam_edit(request, pk):
         form = ExamForm(request.POST, instance=exam)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated exam",
+                details=f"Updated exam: {exam.exam_name}",
+                request=request
+            )
             messages.success(request, 'Exam updated successfully.')
             return redirect('admindashboard:exam_list')
     else:
@@ -198,7 +247,14 @@ def exam_edit(request, pk):
 def exam_delete(request, pk):
     exam = get_object_or_404(Exam, pk=pk)
     if request.method == 'POST':
+        name = exam.exam_name
         exam.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted exam",
+            details=f"Deleted exam: {name}",
+            request=request
+        )
         messages.success(request, 'Exam deleted successfully.')
         return redirect('admindashboard:exam_list')
     return render(request, 'admindashboard/exam/delete.html', {'exam': exam}) 

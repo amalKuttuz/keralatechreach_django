@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import (
     QuestionPaper, University, Degree, Exam, Job, District,
     Initiative, EventCategory, Event, News, ContactMessage,
-    Gallery, SiteSetting, UserProfile
+    Gallery, SiteSetting, UserProfile, ActivityLog
 )
 from .forms import (
     QuestionPaperForm, UniversityForm, DegreeForm, ExamForm, JobForm,
@@ -17,6 +17,9 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.core.paginator import Paginator
+from .views.activity_log import log_activity
+from .mixins import StaffRequiredMixin, ActivityLogMixin
 
 @login_required
 def dashboard(request):
@@ -44,6 +47,12 @@ def question_create(request):
             question = form.save(commit=False)
             question.created_by = request.user.userprofile
             question.save()
+            log_activity(
+                user=request.user,
+                action="Created question paper",
+                details=f"Created question paper for {question.subject} - {question.degree}",
+                request=request
+            )
             messages.success(request, 'Question paper created successfully.')
             return redirect('question_list')
     else:
@@ -57,6 +66,12 @@ def question_edit(request, pk):
         form = QuestionPaperForm(request.POST, request.FILES, instance=question)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated question paper",
+                details=f"Updated question paper for {question.subject} - {question.degree}",
+                request=request
+            )
             messages.success(request, 'Question paper updated successfully.')
             return redirect('question_list')
     else:
@@ -66,7 +81,14 @@ def question_edit(request, pk):
 @login_required
 def question_delete(request, pk):
     question = get_object_or_404(QuestionPaper, pk=pk)
+    details = f"Deleted question paper for {question.subject} - {question.degree}"
     question.delete()
+    log_activity(
+        user=request.user,
+        action="Deleted question paper",
+        details=details,
+        request=request
+    )
     messages.success(request, 'Question paper deleted successfully.')
     return redirect('question_list')
 
@@ -84,6 +106,12 @@ def event_create(request):
             event = form.save(commit=False)
             event.created_by = request.user.userprofile
             event.save()
+            log_activity(
+                user=request.user,
+                action="Created event",
+                details=f"Created event: {event.name}",
+                request=request
+            )
             messages.success(request, 'Event created successfully.')
             return redirect('event_list')
     else:
@@ -97,6 +125,12 @@ def event_edit(request, pk):
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated event",
+                details=f"Updated event: {event.name}",
+                request=request
+            )
             messages.success(request, 'Event updated successfully.')
             return redirect('event_list')
     else:
@@ -106,7 +140,14 @@ def event_edit(request, pk):
 @login_required
 def event_delete(request, pk):
     event = get_object_or_404(Event, pk=pk)
+    details = f"Deleted event: {event.name}"
     event.delete()
+    log_activity(
+        user=request.user,
+        action="Deleted event",
+        details=details,
+        request=request
+    )
     messages.success(request, 'Event deleted successfully.')
     return redirect('event_list')
 
@@ -124,6 +165,12 @@ def news_create(request):
             news = form.save(commit=False)
             news.created_by = request.user.userprofile
             news.save()
+            log_activity(
+                user=request.user,
+                action="Created news article",
+                details=f"Created news article: {news.title}",
+                request=request
+            )
             messages.success(request, 'News created successfully.')
             return redirect('news_list')
     else:
@@ -137,6 +184,12 @@ def news_edit(request, pk):
         form = NewsForm(request.POST, request.FILES, instance=news)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated news article",
+                details=f"Updated news article: {news.title}",
+                request=request
+            )
             messages.success(request, 'News updated successfully.')
             return redirect('news_list')
     else:
@@ -146,7 +199,14 @@ def news_edit(request, pk):
 @login_required
 def news_delete(request, pk):
     news = get_object_or_404(News, pk=pk)
+    details = f"Deleted news article: {news.title}"
     news.delete()
+    log_activity(
+        user=request.user,
+        action="Deleted news article",
+        details=details,
+        request=request
+    )
     messages.success(request, 'News deleted successfully.')
     return redirect('news_list')
 
@@ -164,6 +224,12 @@ def job_create(request):
             job = form.save(commit=False)
             job.created_by = request.user.userprofile
             job.save()
+            log_activity(
+                user=request.user,
+                action="Created job posting",
+                details=f"Created job posting: {job.title}",
+                request=request
+            )
             messages.success(request, 'Job created successfully.')
             return redirect('job_list')
     else:
@@ -177,6 +243,12 @@ def job_edit(request, pk):
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated job posting",
+                details=f"Updated job posting: {job.title}",
+                request=request
+            )
             messages.success(request, 'Job updated successfully.')
             return redirect('job_list')
     else:
@@ -186,7 +258,14 @@ def job_edit(request, pk):
 @login_required
 def job_delete(request, pk):
     job = get_object_or_404(Job, pk=pk)
+    details = f"Deleted job posting: {job.title}"
     job.delete()
+    log_activity(
+        user=request.user,
+        action="Deleted job posting",
+        details=details,
+        request=request
+    )
     messages.success(request, 'Job deleted successfully.')
     return redirect('job_list')
 
@@ -225,6 +304,12 @@ def gallery_create(request):
             gallery = form.save(commit=False)
             gallery.created_by = request.user.userprofile
             gallery.save()
+            log_activity(
+                user=request.user,
+                action="Created gallery item",
+                details=f"Created gallery item: {gallery.title}",
+                request=request
+            )
             messages.success(request, 'Gallery item created successfully.')
             return redirect('gallery_list')
     else:
@@ -238,6 +323,12 @@ def gallery_edit(request, pk):
         form = GalleryForm(request.POST, request.FILES, instance=gallery)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated gallery item",
+                details=f"Updated gallery item: {gallery.title}",
+                request=request
+            )
             messages.success(request, 'Gallery item updated successfully.')
             return redirect('gallery_list')
     else:
@@ -247,7 +338,14 @@ def gallery_edit(request, pk):
 @login_required
 def gallery_delete(request, pk):
     gallery = get_object_or_404(Gallery, pk=pk)
+    details = f"Deleted gallery item: {gallery.title}"
     gallery.delete()
+    log_activity(
+        user=request.user,
+        action="Deleted gallery item",
+        details=details,
+        request=request
+    )
     messages.success(request, 'Gallery item deleted successfully.')
     return redirect('gallery_list')
 
@@ -263,6 +361,12 @@ def register(request):
                     email=form.cleaned_data['email'],
                     created_by=request.user.userprofile if request.user.is_authenticated else None
                 )
+                log_activity(
+                    user=user,
+                    action="User registration",
+                    details=f"New user registered: {user.username}",
+                    request=request
+                )
                 messages.success(request, 'Registration successful. Please log in.')
                 return redirect('admindashboard:login')
     else:
@@ -277,6 +381,12 @@ def profile(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
+            log_activity(
+                user=request.user,
+                action="Profile update",
+                details="Updated user profile information",
+                request=request
+            )
             messages.success(request, 'Your profile has been updated successfully.')
             return redirect('admindashboard:profile')
     else:
@@ -328,8 +438,15 @@ def user_delete(request, pk):
     
     user_profile = get_object_or_404(UserProfile, pk=pk)
     user = user_profile.user
+    details = f"Deleted user: {user.username}"
     
     if request.method == 'POST':
+        log_activity(
+            user=request.user,
+            action="User deletion",
+            details=details,
+            request=request
+        )
         user.delete()  # This will also delete the associated UserProfile due to CASCADE
         messages.success(request, f'User {user.username} has been deleted successfully.')
         return redirect('admindashboard:user_list')
@@ -356,7 +473,7 @@ class UserListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return User.objects.all().order_by('-date_joined')
 
-class UserCreateView(LoginRequiredMixin, CreateView):
+class UserCreateView(LoginRequiredMixin, StaffRequiredMixin, ActivityLogMixin, CreateView):
     model = User
     template_name = 'admindashboard/user/form.html'
     form_class = UserCreationForm
@@ -372,7 +489,7 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'User created successfully.')
         return super().form_valid(form)
 
-class UserUpdateView(LoginRequiredMixin, UpdateView):
+class UserUpdateView(LoginRequiredMixin, StaffRequiredMixin, ActivityLogMixin, UpdateView):
     model = User
     template_name = 'admindashboard/user/form.html'
     form_class = UserChangeForm
@@ -388,7 +505,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'User updated successfully.')
         return super().form_valid(form)
 
-class UserDeleteView(LoginRequiredMixin, DeleteView):
+class UserDeleteView(LoginRequiredMixin, StaffRequiredMixin, ActivityLogMixin, DeleteView):
     model = User
     template_name = 'admindashboard/user/delete.html'
     success_url = reverse_lazy('admindashboard:user_list')
@@ -396,3 +513,22 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'User deleted successfully.')
         return super().delete(request, *args, **kwargs)
+
+@login_required
+def activity_log_view(request):
+    if request.user.is_staff:
+        # Staff can see all logs
+        activities = ActivityLog.objects.all()
+    else:
+        # Regular users can only see their own logs
+        activities = ActivityLog.objects.filter(user=request.user)
+    
+    paginator = Paginator(activities, 20)  # Show 20 activities per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'title': 'Activity Log'
+    }
+    return render(request, 'admindashboard/activity_log.html', context)

@@ -11,7 +11,7 @@
             <h6 class="text-white text-capitalize ps-3 mb-0">{{ title }}</h6>
           </div>
         </div>
-        <div class="card-body">
+        <div class="card-body px-4">
           <form method="post" class="text-start">
             {% csrf_token %}
             
@@ -25,9 +25,11 @@
 
             {% for field in form %}
               {% if field.name in 'is_staff,is_active' %}
-              <div class="form-check form-switch mb-3">
-                {{ field }}
-                <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              <div class="form-check form-switch d-flex align-items-center mb-3">
+                <div class="ms-2">
+                  {{ field }}
+                  <label class="form-check-label ms-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                </div>
                 {% if field.errors %}
                 <div class="text-danger mt-1">
                   {% for error in field.errors %}
@@ -37,22 +39,29 @@
                 {% endif %}
               </div>
               {% else %}
-              <div class="input-group input-group-outline mb-3">
-                <label class="form-label">{{ field.label }}</label>
-                {{ field }}
+              <div class="mb-4">
+                <label class="form-label text-dark ms-0" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="input-group input-group-outline">
+                  {{ field }}
+                </div>
                 {% if field.errors %}
-                <div class="text-danger mt-1">
+                <div class="text-danger mt-1 small">
                   {% for error in field.errors %}
                     {{ error }}
                   {% endfor %}
+                </div>
+                {% endif %}
+                {% if field.help_text %}
+                <div class="form-text text-muted small">
+                  {{ field.help_text }}
                 </div>
                 {% endif %}
               </div>
               {% endif %}
             {% endfor %}
 
-            <div class="text-center">
-              <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">{{ button_text }}</button>
+            <div class="text-center mt-4">
+              <button type="submit" class="btn bg-gradient-dark w-100 mb-2">{{ button_text }}</button>
               <a href="{% url 'admindashboard:user_list' %}" class="btn btn-outline-dark w-100">Cancel</a>
             </div>
           </form>
@@ -84,6 +93,13 @@ document.addEventListener('DOMContentLoaded', function() {
         this.parentElement.classList.remove('is-filled');
       }
     });
+  });
+
+  // Initialize all fields with values as filled
+  document.querySelectorAll('.input-group-outline input, .input-group-outline textarea').forEach(function(input) {
+    if (input.value) {
+      input.parentElement.classList.add('is-filled');
+    }
   });
 });
 </script>
