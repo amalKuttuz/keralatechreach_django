@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.text import slugify
 
 class QuestionPaper(models.Model):
     degree = models.ForeignKey('Degree', on_delete=models.CASCADE)
@@ -99,17 +100,58 @@ class Event(models.Model):
 
 class News(models.Model):
     title = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, max_length=255, blank=True, null=True)
     content = models.TextField()
+    excerpt = models.TextField(blank=True, help_text="A short summary of the article")
     image = models.ImageField(upload_to='news/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='news/thumbnails/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=False)
     created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    
+    # SEO Fields
+    meta_title = models.CharField(max_length=60, blank=True, help_text="SEO optimized title (max 60 characters)")
+    meta_description = models.CharField(max_length=160, blank=True, help_text="SEO meta description (max 160 characters)")
+    keywords = models.CharField(max_length=255, blank=True, help_text="Comma-separated keywords for SEO")
+    
+    # Additional Fields
+    reading_time = models.PositiveIntegerField(default=0, help_text="Estimated reading time in minutes")
+    views_count = models.PositiveIntegerField(default=0)
+    likes_count = models.PositiveIntegerField(default=0)
+    
     class Meta:
-        verbose_name_plural = "News"
-
+        verbose_name_plural = 'News'
+        ordering = ['-created_at']
+    
     def __str__(self):
         return self.title
+    
+    def save(self, *args, **kwargs):
+        # Generate slug if not provided
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            # Check if slug exists and generate a unique one
+            while News.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        
+        # Calculate reading time
+        words = len(self.content.split())
+        self.reading_time = max(1, int(words / 200))  # Assuming 200 words per minute reading speed
+        
+        # Set meta title and description if not provided
+        if not self.meta_title:
+            self.meta_title = self.title[:60]
+        if not self.meta_description and self.excerpt:
+            self.meta_description = self.excerpt[:160]
+        elif not self.meta_description:
+            self.meta_description = self.content[:160]
+            
+        super().save(*args, **kwargs)
 
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)
@@ -266,3 +308,30 @@ class AffiliateProduct(models.Model):
 
     def __str__(self):
         return self.title
+
+class Testimonial(models.Model):
+    author_name = models.CharField(max_length=100)
+    author_designation = models.CharField(max_length=100, blank=True, null=True)
+    testimonial_text = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Testimonial by {self.author_name}"
+
+    class Meta:
+        ordering = ['-created_at']
+
+class FAQ(models.Model):
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    is_published = models.BooleanField(default=False)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.question
+
+    class Meta:
+        ordering = ['display_order', 'created_at']

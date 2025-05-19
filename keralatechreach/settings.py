@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'admindashboard',
+    'publicpage',
+    'widget_tweaks',
+
 ]
 
 MIDDLEWARE = [

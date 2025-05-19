@@ -12,17 +12,28 @@
                     </div>
                 </div>
                 <div class="card-body px-4 pb-2">
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" action="{% if news %}{% url 'admindashboard:news_edit' news.pk %}{% else %}{% url 'admindashboard:news_create' %}{% endif %}">
                         {% csrf_token %}
                         
                         <!-- Title -->
-                        <div class="input-group input-group-outline is-filled mb-4">
-                            <label class="form-label">Title</label>
+                        <div class="input-group input-group-dynamic mb-4">
                             {{ form.title }}
+                            <label class="form-label">Title</label>
                         </div>
                         {% if form.title.errors %}
                         <div class="text-danger mb-3">
                             {{ form.title.errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Slug -->
+                        <div class="input-group input-group-dynamic mb-4">
+                            {{ form.slug }}
+                            <label class="form-label">URL Slug (optional)</label>
+                        </div>
+                        {% if form.slug.errors %}
+                        <div class="text-danger mb-3">
+                            {{ form.slug.errors }}
                         </div>
                         {% endif %}
                         
@@ -36,43 +47,109 @@
                             {{ form.content.errors }}
                         </div>
                         {% endif %}
-                        
-                        <!-- Image -->
+
+                        <!-- Excerpt -->
                         <div class="mb-4">
-                            {% if form.instance.image %}
-                            <div class="mb-3">
-                                <img src="{{ form.instance.image.url }}" alt="Current Image" class="img-fluid" style="max-height: 200px;">
-                                <p class="text-sm">Current image</p>
-                            </div>
-                            {% endif %}
-                            <div class="input-group input-group-outline is-filled">
-                                <label class="form-label">Image</label>
-                                {{ form.image }}
-                            </div>
-                            {% if form.image.errors %}
-                            <div class="text-danger mt-2">
-                                {{ form.image.errors }}
-                            </div>
-                            {% endif %}
+                            <label class="form-label d-block mb-3">Excerpt</label>
+                            {{ form.excerpt }}
+                            <small class="text-muted">A short summary of the article that will appear in listings and social media shares.</small>
                         </div>
-                        
-                        <!-- Published Status -->
-                        <div class="form-check form-switch mb-4">
-                            {{ form.is_published }}
-                            <label class="form-check-label" for="{{ form.is_published.id_for_label }}">
-                                Published
-                            </label>
-                        </div>
-                        {% if form.is_published.errors %}
+                        {% if form.excerpt.errors %}
                         <div class="text-danger mb-3">
-                            {{ form.is_published.errors }}
+                            {{ form.excerpt.errors }}
                         </div>
                         {% endif %}
                         
-                        <div class="text-center">
-                            <button type="submit" class="btn bg-gradient-primary w-100 my-4 mb-2">Save</button>
-                            <a href="{% url 'admindashboard:news_list' %}" class="btn bg-gradient-secondary w-100">Cancel</a>
+                        <!-- SEO Section -->
+                        <div class="card mt-4 mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">SEO Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Meta Title -->
+                                <div class="input-group input-group-dynamic mb-4">
+                                    {{ form.meta_title }}
+                                    <label class="form-label">Meta Title</label>
+                                    <small class="form-text text-muted d-block">Maximum 60 characters for optimal SEO.</small>
+                                </div>
+                                {% if form.meta_title.errors %}
+                                <div class="text-danger mb-3">
+                                    {{ form.meta_title.errors }}
+                                </div>
+                                {% endif %}
+
+                                <!-- Meta Description -->
+                                <div class="input-group input-group-dynamic mb-4">
+                                    {{ form.meta_description }}
+                                    <label class="form-label">Meta Description</label>
+                                    <small class="form-text text-muted d-block">Maximum 160 characters for optimal SEO.</small>
+                                </div>
+                                {% if form.meta_description.errors %}
+                                <div class="text-danger mb-3">
+                                    {{ form.meta_description.errors }}
+                                </div>
+                                {% endif %}
+
+                                <!-- Keywords -->
+                                <div class="input-group input-group-dynamic mb-4">
+                                    {{ form.keywords }}
+                                    <label class="form-label">Keywords</label>
+                                    <small class="form-text text-muted d-block">Comma-separated keywords for SEO.</small>
+                                </div>
+                                {% if form.keywords.errors %}
+                                <div class="text-danger mb-3">
+                                    {{ form.keywords.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
+
+                        <!-- Media Section -->
+                        <div class="card mt-4 mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Media</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Main Image -->
+                                <div class="mb-4">
+                                    <label class="form-label">Main Image</label>
+                                    <div class="input-group input-group-dynamic">
+                                        {{ form.image }}
+                                    </div>
+                                    <small class="form-text text-muted d-block">This will be used as the main article image.</small>
+                                </div>
+                                {% if form.image.errors %}
+                                <div class="text-danger mb-3">
+                                    {{ form.image.errors }}
+                                </div>
+                                {% endif %}
+
+                                <!-- Thumbnail -->
+                                <div class="mb-4">
+                                    <label class="form-label">Thumbnail</label>
+                                    <div class="input-group input-group-dynamic">
+                                        {{ form.thumbnail }}
+                                    </div>
+                                    <small class="form-text text-muted d-block">This will be used in article listings and previews.</small>
+                                </div>
+                                {% if form.thumbnail.errors %}
+                                <div class="text-danger mb-3">
+                                    {{ form.thumbnail.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Publishing -->
+                        <div class="form-check form-switch mb-4">
+                            {{ form.is_published }}
+                            <label class="form-check-label" for="{{ form.is_published.id_for_label }}">
+                                Publish article
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn bg-gradient-primary">Save Article</button>
+                        <a href="{% url 'admindashboard:news_list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </form>
                 </div>
             </div>
@@ -84,6 +161,7 @@
 {% block extra_js %}
 <!-- Include TinyMCE from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.7.2/tinymce.min.js"></script>
+<script>
     tinymce.init({
         selector: '#id_content',
         height: 500,
@@ -110,75 +188,16 @@
         automatic_uploads: true,
         file_picker_types: 'image',
         visualblocks_default_state: true,
-        content_style: `
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
-                font-size: 16px;
-                line-height: 1.6;
-                margin: 1rem;
-                max-width: 100%;
-            }
-            p { margin: 0 0 1rem 0; }
-            h1 { font-size: 2em; margin: 1.5rem 0 1rem; }
-            h2 { font-size: 1.75em; margin: 1.4rem 0 0.9rem; }
-            h3 { font-size: 1.5em; margin: 1.3rem 0 0.8rem; }
-            h4 { font-size: 1.25em; margin: 1.2rem 0 0.7rem; }
-            img { max-width: 100%; height: auto; }
-            table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-            table td, table th { border: 1px solid #ddd; padding: 8px; }
-            blockquote { border-left: 3px solid #ddd; margin: 1rem 0; padding: 1rem; background: #f8f9fa; }
-            pre { background: #f5f5f5; padding: 1rem; border-radius: 4px; }
-            code { background: #f5f5f5; padding: 2px 4px; border-radius: 2px; }
-        `,
-        style_formats: [
-            { title: 'Headings', items: [
-                { title: 'Heading 1', format: 'h1' },
-                { title: 'Heading 2', format: 'h2' },
-                { title: 'Heading 3', format: 'h3' },
-                { title: 'Heading 4', format: 'h4' }
-            ]},
-            { title: 'Text', items: [
-                { title: 'Bold', format: 'bold' },
-                { title: 'Italic', format: 'italic' },
-                { title: 'Underline', format: 'underline' },
-                { title: 'Strikethrough', format: 'strikethrough' },
-                { title: 'Code', format: 'code' }
-            ]},
-            { title: 'Blocks', items: [
-                { title: 'Paragraph', format: 'p' },
-                { title: 'Blockquote', format: 'blockquote' },
-                { title: 'Code Block', format: 'pre' }
-            ]},
-            { title: 'Alignment', items: [
-                { title: 'Left', format: 'alignleft' },
-                { title: 'Center', format: 'aligncenter' },
-                { title: 'Right', format: 'alignright' },
-                { title: 'Justify', format: 'alignjustify' }
-            ]}
-        ],
-        setup: function(editor) {
-            editor.on('init', function() {
-                this.getContainer().style.transition = "border-color 0.15s ease-in-out";
-                this.getContainer().style.border = "1px solid #d2d6da";
-                this.getContainer().style.borderRadius = "0.375rem";
-            });
-            editor.on('focus', function() {
-                this.getContainer().style.borderColor = "#e91e63";
-            });
-            editor.on('blur', function() {
-                this.getContainer().style.borderColor = "#d2d6da";
-            });
-        }
-    });
-
-    // Add focused class to input groups when they receive focus
-    document.querySelectorAll('.input-group-outline input, .input-group-outline textarea').forEach(input => {
-        input.addEventListener('focus', () => {
-            input.closest('.input-group-outline').classList.add('focused');
-        });
-        input.addEventListener('blur', () => {
-            input.closest('.input-group-outline').classList.remove('focused');
-        });
+        codesample_languages: [
+            { text: 'HTML/XML', value: 'markup' },
+            { text: 'JavaScript', value: 'javascript' },
+            { text: 'CSS', value: 'css' },
+            { text: 'PHP', value: 'php' },
+            { text: 'Python', value: 'python' },
+            { text: 'Java', value: 'java' },
+            { text: 'C', value: 'c' },
+            { text: 'C++', value: 'cpp' }
+        ]
     });
 </script>
 {% endblock %}

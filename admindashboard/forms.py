@@ -6,6 +6,7 @@ from .models import (
     Initiative, EventCategory, Event, News, ContactMessage,
     Gallery, SiteSetting, UserProfile
 )
+from django.utils.text import slugify
 
 class QuestionPaperForm(forms.ModelForm):
     class Meta:
@@ -113,13 +114,62 @@ class EventForm(forms.ModelForm):
 class NewsForm(forms.ModelForm):
     class Meta:
         model = News
-        fields = ['title', 'content', 'image', 'is_published']
+        fields = [
+            'title', 'slug', 'content', 'excerpt',
+            'image', 'thumbnail', 'is_published',
+            'meta_title', 'meta_description', 'keywords'
+        ]
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'content': forms.Textarea(attrs={'class': 'form-control'}),
-            'image': forms.FileInput(attrs={'class': 'form-control'}),
-            'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': ' ',
+            }),
+            'slug': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': ' ',
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control tinymce',
+                'rows': 10
+            }),
+            'excerpt': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter a brief summary of the article'
+            }),
+            'meta_title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': ' ',
+            }),
+            'meta_description': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': ' ',
+            }),
+            'keywords': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': ' ',
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'thumbnail': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'is_published': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'role': 'switch'
+            }),
         }
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug')
+        if not slug:
+            title = self.cleaned_data.get('title')
+            if title:
+                slug = slugify(title)
+        return slug
 
 class ContactMessageForm(forms.ModelForm):
     class Meta:

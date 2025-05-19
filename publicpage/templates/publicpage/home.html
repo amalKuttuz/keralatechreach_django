@@ -1,0 +1,400 @@
+{% extends 'publicpage/base.html' %}
+{% load static %}
+{% block title %}Kerala Tech Reach - Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero section styles */
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                    url('https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 150px 0 100px;
+        margin-bottom: 0;
+    }
+
+    /* Card hover effects */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Section styles */
+    .section-title {
+        position: relative;
+        margin-bottom: 40px;
+        padding-bottom: 15px;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: var(--primary-color);
+    }
+
+    /* Custom badge styles */
+    .badge-custom {
+        background-color: var(--accent-color);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    /* Timeline for events */
+    .timeline-item {
+        border-left: 2px solid var(--primary-color);
+        padding-left: 20px;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary-color);
+    }
+
+    /* Search bar */
+    .search-section {
+        background: #f8f9fa;
+        padding: 30px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .search-box {
+        border-radius: 30px;
+        padding: 15px 25px;
+        border: 2px solid #e9ecef;
+    }
+
+    .news-card {
+        transition: transform 0.3s ease;
+    }
+    .news-card:hover {
+        transform: translateY(-5px);
+    }
+    .news-card .card-title {
+        font-size: 1.25rem;
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+        color: #2c3e50;
+    }
+    .news-card .card-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .news-card .badge {
+        font-size: 0.8rem;
+        padding: 0.5em 1em;
+    }
+    .news-card .card-footer {
+        padding: 1rem;
+    }
+    .news-card .text-primary {
+        font-weight: 500;
+    }
+    .news-card .text-primary:hover {
+        text-decoration: underline !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 mb-4">Welcome to Kerala Tech Reach</h1>
+        <p class="lead mb-4">Your one-stop destination for educational resources, events, and government initiatives</p>
+        <a href="#resources" class="btn btn-primary btn-lg">Explore Resources</a>
+    </div>
+</section>
+
+<!-- Search Section -->
+<div class="search-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form method="GET" action="{% url 'publicpage:search' %}">
+                    <input type="text" name="q" class="form-control search-box" placeholder="Search for resources, events, or initiatives...">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Latest Events Section -->
+<section class="section-padding">
+    <div class="container">
+        <h2 class="section-title">Upcoming Events</h2>
+        <div class="row">
+            <div class="col-lg-8">
+                {% for event in upcoming_events %}
+                <div class="timeline-item">
+                    <h4>{{ event.name }}</h4>
+                    <p class="text-muted">{{ event.event_start|date:"F d, Y" }}</p>
+                    <p>{{ event.description|truncatewords:30 }}</p>
+                    {% if event.link %}
+                        <a href="{{ event.link }}" class="btn btn-outline-primary btn-sm">Learn More</a>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p>No upcoming events at the moment.</p>
+                {% endfor %}
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Event Calendar</h5>
+                        <p class="card-text">View all upcoming events and register for them in advance.</p>
+                        <a href="{% url 'publicpage:events' %}" class="btn btn-primary">View Calendar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- News Articles Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">Latest News</h2>
+            <a href="{% url 'publicpage:news_list' %}" class="btn btn-outline-primary">View All News</a>
+        </div>
+        <div class="row g-4">
+            {% for news in latest_news %}
+            <div class="col-md-4">
+                <div class="card h-100 news-card border-0 shadow-sm">
+                    <div class="position-relative">
+                        {% if news.image %}
+                            <img src="{{ news.image.url }}" class="card-img-top" alt="{{ news.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'images/placeholder-news.jpg' %}" class="card-img-top" alt="News Image" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        {% if news.category %}
+                            <span class="position-absolute top-0 start-0 m-3 badge bg-primary">{{ news.category }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <small class="text-muted me-3">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {{ news.created_at|date:"M d, Y" }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ news.reading_time }} min read
+                            </small>
+                        </div>
+                        <h5 class="card-title">{{ news.title }}</h5>
+                        {% if news.excerpt %}
+                            <p class="card-text text-muted">{{ news.excerpt|truncatewords:20 }}</p>
+                        {% else %}
+                            <p class="card-text text-muted">{{ news.content|striptags|truncatewords:20 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'publicpage:news_detail' news.slug %}" class="text-primary text-decoration-none">
+                                Read More <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                            {% if news.keywords %}
+                                <div class="d-flex gap-2">
+                                    {% for keyword in news.keywords.split|slice:":2" %}
+                                        <span class="badge bg-light text-dark">{{ keyword|title }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No news articles available at the moment.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Question Papers Section -->
+<section class="section-padding">
+    <div class="container">
+        <h2 class="section-title">Latest Exam Updates</h2>
+        <div class="row">
+            {% for exam in latest_exams %}
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">{{ exam.exam_name }}</h5>
+                        <p class="card-text">{{ exam.degree_name.name }} - {{ exam.semester }}</p>
+                        <p class="text-muted">Date: {{ exam.exam_date|date:"F d, Y" }}</p>
+                        <a href="{{ exam.exam_url }}" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-5">
+            <h3 class="section-title">Entrance Exam Notifications</h3>
+            <div class="row">
+                {% for notification in entrance_notifications %}
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bell fa-3x mb-3 text-primary"></i>
+                            <h5 class="card-title">{{ notification.title }}</h5>
+                            <p class="card-text">{{ notification.description|truncatewords:15 }}</p>
+                            <p class="text-muted">Deadline: {{ notification.deadline|date:"F d, Y" }}</p>
+                            {% if notification.link %}
+                                <a href="{{ notification.link }}" class="btn btn-outline-primary">Apply Now</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Government Initiatives Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <h2 class="section-title">Government Initiatives</h2>
+        <div class="row">
+            {% for initiative in initiatives %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ initiative.name }}</h5>
+                        <p class="card-text">{{ initiative.description|truncatewords:50 }}</p>
+                        <ul class="list-unstyled">
+                            {% if initiative.photo %}
+                            <li class="mb-2">
+                                <img src="{{ initiative.photo.url }}" alt="{{ initiative.name }}" class="img-fluid mb-3">
+                            </li>
+                            {% endif %}
+                        </ul>
+                        {% if initiative.link %}
+                            <a href="{{ initiative.link }}" class="btn btn-primary">Learn More</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+{% if testimonials %}
+<section class="section-padding">
+    <div class="container">
+        <h2 class="section-title">What People Say</h2>
+        <div class="row">
+            {% for testimonial in testimonials %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="card-text font-italic">"{{ testimonial.testimonial_text|truncatewords:30 }}"</p>
+                        <footer class="blockquote-footer mt-3">
+                            {{ testimonial.author_name }}
+                            {% if testimonial.author_designation %}
+                                <cite title="Source Title">{{ testimonial.author_designation }}</cite>
+                            {% endif %}
+                        </footer>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- FAQ Section -->
+{% if faqs %}
+<section class="section-padding bg-light">
+    <div class="container">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="accordion" id="faqAccordion">
+                    {% for faq in faqs %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
+                                {{ faq.question }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {{ faq.answer }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Call to Action -->
+<section class="section-padding text-center">
+    <div class="container">
+        <h2 class="mb-4">Stay Updated with Latest Resources</h2>
+        <p class="lead mb-4">Subscribe to our newsletter to receive updates about new resources, events, and initiatives.</p>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form method="POST" action="{% url 'publicpage:newsletter_signup' %}">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Enter your email address" required>
+                        <button class="btn btn-primary" type="submit">Subscribe</button>
+                    </div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} mt-3">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+{% endblock %}
+
