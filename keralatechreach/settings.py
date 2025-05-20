@@ -27,7 +27,15 @@ SECRET_KEY = 'django-insecure-h1lq8-ei0s#**2-%1(*1&)2=27ex)#c4iyv(=g@e@#k1s59rm1
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['lms.keralify.com','localhost','127.0.0.1','keralify.com','keralatechreach.in']
+ALLOWED_HOSTS = [
+    'lms.keralify.com',
+    'localhost',
+    '127.0.0.1',
+    'keralify.com',
+    'www.keralify.com',
+    'keralatechreach.in',
+    'www.keralatechreach.in'
+]
 
 
 # Application definition
