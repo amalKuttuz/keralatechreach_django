@@ -335,3 +335,42 @@ class FAQ(models.Model):
 
     class Meta:
         ordering = ['display_order', 'created_at']
+
+class ContactUs(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Contact Message'
+        verbose_name_plural = 'Contact Messages'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
+
+class AdSettings(models.Model):
+    name = models.CharField(max_length=100)
+    ad_code = models.TextField(help_text="Paste your third-party ad code here (e.g., Google AdSense)")
+    location = models.CharField(max_length=50, choices=[
+        ('above_content', 'Above Content'),
+        ('below_content', 'Below Content'),
+        ('sidebar_top', 'Sidebar Top'),
+        ('sidebar_bottom', 'Sidebar Bottom'),
+        ('between_content', 'Between Content')
+    ])
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Ad Setting'
+        verbose_name_plural = 'Ad Settings'
+        ordering = ['location', '-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_location_display()})"

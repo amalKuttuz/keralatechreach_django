@@ -12,4 +12,7 @@ urlpatterns = [
     path('news/<slug:slug>/', views.news_detail, name='news_detail'),
     path('events/<int:pk>/', views.event_detail, name='event_detail'),
     path('questionpapers/<int:pk>/', views.questionpaper_detail, name='questionpaper_detail'),
+    path('about/', views.about, name='about'),
+    path('services/', views.services, name='services'),
+    path('contact/', views.contact, name='contact'),
 ]

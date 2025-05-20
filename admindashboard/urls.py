@@ -21,6 +21,8 @@ from .views.users import (
 )
 from .views.jobs import job_list, job_create, job_edit, job_delete
 from .views.activity_log import activity_log_view
+from .views.contact_messages import contact_messages, contact_message_detail, contact_message_delete
+from .views.ads import ad_list, ad_create, ad_edit, ad_delete
 
 app_name = 'admindashboard'
 
@@ -129,4 +131,15 @@ urlpatterns = [
     path('gallery/<int:pk>/delete/', gallery_delete, name='gallery_delete'),
     
     path('activity-log/', activity_log_view, name='activity_log'),
+
+    # Contact Messages
+    path('contact-messages/', contact_messages, name='contact_messages'),
+    path('contact-messages/<int:pk>/', contact_message_detail, name='contact_message_detail'),
+    path('contact-messages/<int:pk>/delete/', contact_message_delete, name='contact_message_delete'),
+
+    # Ad Settings
+    path('ads/', ad_list, name='ad_list'),
+    path('ads/create/', ad_create, name='ad_create'),
+    path('ads/<int:pk>/edit/', ad_edit, name='ad_edit'),
+    path('ads/<int:pk>/delete/', ad_delete, name='ad_delete'),
 ]

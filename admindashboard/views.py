@@ -532,3 +532,5 @@ def activity_log_view(request):
         'title': 'Activity Log'
     }
     return render(request, 'admindashboard/activity_log.html', context)
+
+

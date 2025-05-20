@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from .models import (
     QuestionPaper, University, Degree, Exam, Job, District,
     Initiative, EventCategory, Event, News, ContactMessage,
-    Gallery, SiteSetting, UserProfile
+    Gallery, SiteSetting, UserProfile, AdSettings
 )
 from django.utils.text import slugify
 
@@ -280,4 +280,19 @@ class UserManagementForm(forms.ModelForm):
             'is_verified': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_approved': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_blocked': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class AdSettingsForm(forms.ModelForm):
+    class Meta:
+        model = AdSettings
+        fields = ['name', 'ad_code', 'location', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'ad_code': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 5,
+                'placeholder': 'Paste your ad code here (e.g., Google AdSense code)'
+            }),
+            'location': forms.Select(attrs={'class': 'form-select'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

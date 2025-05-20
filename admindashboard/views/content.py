@@ -18,8 +18,12 @@ def news_list(request):
 @login_required
 def news_create(request):
     if request.method == 'POST':
+        print("DEBUG: POST request received")
         form = NewsForm(request.POST, request.FILES)
+        print("DEBUG: Form data:", request.POST)
+        print("DEBUG: Files:", request.FILES)
         if form.is_valid():
+            print("DEBUG: Form is valid")
             news = form.save(commit=False)
             news.created_by = request.user.userprofile
             news.save()
@@ -31,6 +35,8 @@ def news_create(request):
             )
             messages.success(request, 'News article created successfully.')
             return redirect('admindashboard:news_list')
+        else:
+            print("DEBUG: Form errors:", form.errors)
     else:
         form = NewsForm()
     return render(request, 'admindashboard/news/form.html', {

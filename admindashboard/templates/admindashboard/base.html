@@ -115,6 +115,25 @@
             <span class="nav-link-text ms-1">Gallery</span>
           </a>
         </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link {% if 'ad_' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:ad_list' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">ads_click</i>
+            </div>
+            <span class="nav-link-text ms-1">Ads</span>
+          </a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link {% if 'contact_message' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:contact_messages' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">mail</i>
+            </div>
+            <span class="nav-link-text ms-1">Contact Messages</span>
+            {% if unread_count > 0 %}
+              <span class="badge bg-primary ms-2">{{ unread_count }}</span>
+            {% endif %}
+          </a>
+        </li>
 
         <li class="nav-item mt-4 mb-2">
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Settings</h6>
@@ -165,9 +184,6 @@
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">
       <div class="mx-3">
-        <a href="{% url 'admindashboard:logout' %}" class="btn bg-gradient-dark w-100 mb-3">
-          <i class="material-symbols-rounded opacity-10 me-2">logout</i> Logout
-        </a>
       </div>
     </div>
   </aside>

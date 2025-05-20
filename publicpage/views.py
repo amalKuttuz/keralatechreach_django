@@ -9,7 +9,7 @@ from django.utils.text import slugify
 from itertools import chain
 
 from django.contrib.auth import get_user_model
-from admindashboard.models import News, Event, QuestionPaper, Testimonial, FAQ, Initiative, Exam, EntranceNotification # Import FAQ model
+from admindashboard.models import News, Event, QuestionPaper, Testimonial, FAQ, Initiative, Exam, EntranceNotification, ContactUs, AdSettings # Import FAQ model and AdSettings
 from .forms import NewsletterSignupForm # Import the newsletter form
 from .models import NewsletterSubscriber # Import the newsletter model
 
@@ -78,50 +78,26 @@ def newsletter_signup(request):
 # Detail views for public pages
 def news_detail(request, slug):
     news_article = get_object_or_404(News, slug=slug, is_published=True)
+    related_news = News.objects.filter(is_published=True).exclude(id=news_article.id).order_by('-created_at')[:3]
     
-    # Get keywords from the current article
-    keywords = [kw.strip() for kw in news_article.keywords.split(',')] if news_article.keywords else []
+    # Get active ads for each location
+    ads = {
+        'above_content': AdSettings.objects.filter(location='above_content', is_active=True).first(),
+        'below_content': AdSettings.objects.filter(location='below_content', is_active=True).first(),
+        'sidebar_top': AdSettings.objects.filter(location='sidebar_top', is_active=True).first(),
+        'sidebar_bottom': AdSettings.objects.filter(location='sidebar_bottom', is_active=True).first(),
+        'between_content': AdSettings.objects.filter(location='between_content', is_active=True).first(),
+    }
     
-    # Get related articles based on keywords
-    related_by_keywords = News.objects.filter(
-        is_published=True,
-        keywords__icontains=keywords[0] if keywords else ''
-    ).exclude(slug=slug)[:3] if keywords else News.objects.none()
-    
-    # Get articles with similar titles
-    title_words = set(word.lower() for word in news_article.title.split() if len(word) > 3)
-    title_queries = [Q(title__icontains=word) for word in title_words]
-    
-    if title_queries:
-        query = title_queries.pop()
-        for item in title_queries:
-            query |= item
-        related_by_title = News.objects.filter(
-            query,
-            is_published=True
-        ).exclude(slug=slug)[:3]
-    else:
-        related_by_title = News.objects.none()
-    
-    # Get latest articles if we don't have enough related articles
-    latest_articles = News.objects.filter(
-        is_published=True
-    ).exclude(
-        slug=slug
-    ).exclude(
-        id__in=[article.id for article in chain(related_by_keywords, related_by_title)]
-    ).order_by('-created_at')[:3]
-    
-    # Combine and deduplicate related articles
-    related_news = list(chain(related_by_keywords, related_by_title, latest_articles))
-    seen = set()
-    related_news = [article for article in related_news if article.id not in seen and not seen.add(article.id)][:3]
+    # Increment view count
+    news_article.views_count += 1
+    news_article.save()
     
     context = {
         'news_article': news_article,
         'related_news': related_news,
+        'ads': ads,
     }
-    
     return render(request, 'publicpage/news_detail.html', context)
 
 def event_detail(request, pk):
@@ -223,3 +199,26 @@ def news_list(request):
         'news_articles': news_articles,
     }
     return render(request, 'publicpage/news_list.html', context)
+
+def about(request):
+    return render(request, 'publicpage/about.html')
+
+def services(request):
+    return render(request, 'publicpage/services.html')
+
+def contact(request):
+    if request.method == 'POST':
+        try:
+            # Create new contact message
+            ContactUs.objects.create(
+                name=request.POST.get('name'),
+                email=request.POST.get('email'),
+                subject=request.POST.get('subject'),
+                message=request.POST.get('message')
+            )
+            messages.success(request, 'Thank you for your message! We will get back to you soon.')
+        except Exception as e:
+            messages.error(request, 'Sorry, there was an error sending your message. Please try again.')
+        return redirect('publicpage:contact')
+        
+    return render(request, 'publicpage/contact.html')

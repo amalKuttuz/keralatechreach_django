@@ -232,7 +232,7 @@
 
     @media (max-width: 768px) {
         .article-title {
-            padding-top: 1.5rem;
+            padding-top: 4rem;
         }
     }
 
@@ -326,8 +326,8 @@
 
     .must-read-item {
         display: flex;
-        gap: 1rem;
-        padding: 1rem 0;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
         border-bottom: 1px solid #eee;
     }
 
@@ -336,16 +336,22 @@
     }
 
     .must-read-image {
-        width: 100px;
-        height: 70px;
+        width: 80px;
+        height: 60px;
         object-fit: cover;
         border-radius: 4px;
     }
 
     .must-read-content h5 {
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-        line-height: 1.4;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        max-height: 2.6em;
     }
 
     .must-read-content a {
@@ -409,12 +415,12 @@
         }
 
         .must-read-item {
-            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .must-read-image {
-            width: 100%;
-            height: 150px;
+            width: 70px;
+            height: 50px;
         }
 
         /* Improve table scrolling on mobile */
@@ -456,9 +462,16 @@
 
         .article-meta {
             font-size: 0.8rem;
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: flex-start;
+            gap: 0.75rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .article-meta::-webkit-scrollbar {
+            display: none;  /* Chrome, Safari and Opera */
         }
 
         .share-box {
@@ -607,12 +620,44 @@
             height: 160px;
         }
     }
+
+    /* Ad Container Styles */
+    .ad-container {
+        text-align: center;
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .ad-container > * {
+        margin: 0 auto;
+    }
+
+    .ad-between-content {
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .ad-container {
+            margin-left: -12px;
+            margin-right: -12px;
+            border-radius: 0;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="article-container">
-            <article>
+    <article>
+        <!-- Above Content Ad -->
+        {% if ads.above_content %}
+        <div class="ad-container ad-above-content mb-4">
+            {{ ads.above_content.ad_code|safe }}
+        </div>
+        {% endif %}
+
         <!-- Article Header -->
         <header class="article-header">
             <div class="article-category">{{ news_article.category|default:"KERALA TECH" }}</div>
@@ -662,9 +707,23 @@
                     </ul>
                 </div>
 
+                <!-- Between Content Ad -->
+                {% if ads.between_content %}
+                <div class="ad-container ad-between-content my-4">
+                    {{ ads.between_content.ad_code|safe }}
+                </div>
+                {% endif %}
+
                 <div class="article-text">
                     {{ news_article.content|safe }}
                 </div>
+
+                <!-- Below Content Ad -->
+                {% if ads.below_content %}
+                <div class="ad-container ad-below-content mt-4">
+                    {{ ads.below_content.ad_code|safe }}
+                </div>
+                {% endif %}
 
                 {% if news_article.keywords %}
                 <div class="article-tags">
@@ -705,6 +764,13 @@
             </div>
 
             <aside class="article-sidebar">
+                <!-- Sidebar Top Ad -->
+                {% if ads.sidebar_top %}
+                <div class="ad-container ad-sidebar-top mb-4">
+                    {{ ads.sidebar_top.ad_code|safe }}
+                </div>
+                {% endif %}
+
                 <!-- Share Box -->
                 <div class="share-box">
                     <h4>Share This Article</h4>
@@ -742,11 +808,18 @@
                         <img src="{{ article.image.url }}" alt="{{ article.title }}" class="must-read-image">
                         {% endif %}
                         <div class="must-read-content">
-                            <h5><a href="{% url 'publicpage:news_detail' article.slug %}">{{ article.title }}</a></h5>
+                            <h5><a href="{% url 'publicpage:news_detail' article.slug %}">{{ article.title|truncatechars:20 }}</a></h5>
                             <small class="text-muted">{{ article.created_at|date:"d M Y" }}</small>
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Sidebar Bottom Ad -->
+                {% if ads.sidebar_bottom %}
+                <div class="ad-container ad-sidebar-bottom mt-4">
+                    {{ ads.sidebar_bottom.ad_code|safe }}
                 </div>
                 {% endif %}
             </aside>

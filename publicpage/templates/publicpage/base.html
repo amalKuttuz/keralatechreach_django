@@ -77,23 +77,23 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="/">Kerala Tech Reach</a>
+            <a class="navbar-brand" href="{% url 'publicpage:home' %}">Kerala Tech Reach</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="{% url 'publicpage:home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/about">About</a>
+                        <a class="nav-link" href="{% url 'publicpage:about' %}">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/services">Services</a>
+                        <a class="nav-link" href="{% url 'publicpage:services' %}">Services</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/contact">Contact</a>
+                        <a class="nav-link" href="{% url 'publicpage:contact' %}">Contact</a>
                     </li>
                 </ul>
             </div>
@@ -117,10 +117,10 @@
                 <div class="col-md-4">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="/" class="text-white">Home</a></li>
-                        <li><a href="/about" class="text-white">About</a></li>
-                        <li><a href="/services" class="text-white">Services</a></li>
-                        <li><a href="/contact" class="text-white">Contact</a></li>
+                        <li><a href="{% url 'publicpage:home' %}" class="text-white">Home</a></li>
+                        <li><a href="{% url 'publicpage:about' %}" class="text-white">About</a></li>
+                        <li><a href="{% url 'publicpage:services' %}" class="text-white">Services</a></li>
+                        <li><a href="{% url 'publicpage:contact' %}" class="text-white">Contact</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
