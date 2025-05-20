@@ -230,6 +230,12 @@
         margin-bottom: 1rem;
     }
 
+    @media (max-width: 768px) {
+        .article-title {
+            padding-top: 1.5rem;
+        }
+    }
+
     .article-subtitle {
         font-size: clamp(1.125rem, 2vw, 1.3rem);
         color: #444;
@@ -606,7 +612,7 @@
 
 {% block content %}
 <div class="article-container">
-    <article>
+            <article>
         <!-- Article Header -->
         <header class="article-header">
             <div class="article-category">{{ news_article.category|default:"KERALA TECH" }}</div>

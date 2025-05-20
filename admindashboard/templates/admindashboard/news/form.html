@@ -47,7 +47,7 @@
                             {{ form.content.errors }}
                         </div>
                         {% endif %}
-
+                        
                         <!-- Excerpt -->
                         <div class="mb-4">
                             <label class="form-label d-block mb-3">Excerpt</label>
@@ -99,8 +99,8 @@
                                 {% if form.keywords.errors %}
                                 <div class="text-danger mb-3">
                                     {{ form.keywords.errors }}
-                                </div>
-                                {% endif %}
+                            </div>
+                            {% endif %}
                             </div>
                         </div>
 
@@ -117,10 +117,10 @@
                                         {{ form.image }}
                                     </div>
                                     <small class="form-text text-muted d-block">This will be used as the main article image.</small>
-                                </div>
-                                {% if form.image.errors %}
+                            </div>
+                            {% if form.image.errors %}
                                 <div class="text-danger mb-3">
-                                    {{ form.image.errors }}
+                                {{ form.image.errors }}
                                 </div>
                                 {% endif %}
 
