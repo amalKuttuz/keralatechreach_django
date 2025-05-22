@@ -111,6 +111,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://keralatechreach.in",
     "https://lms.keralify.com",
     "https://keralify.com",
+    "https://192.168.3.123:8000",
     # Add your Android app's domain when deployed
 ]
     

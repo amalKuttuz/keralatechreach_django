@@ -34,7 +34,9 @@ ALLOWED_HOSTS = [
     'keralify.com',
     'www.keralify.com',
     'keralatechreach.in',
-    'www.keralatechreach.in'
+    'www.keralatechreach.in',
+    '192.168.3.123',  # Adding your physical device IP
+    '*'  # This will allow all hosts - only use during development!
 ]
 
 

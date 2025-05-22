@@ -12,6 +12,7 @@ urlpatterns = [
     # Admin Dashboard URLs
     path('admindashboard/', include('admindashboard.urls')),
     path('', include('publicpage.urls')),  # Landing page for non-logged-in users
+    path('api/', include('api.urls')),
 
     # Redirect root to admin dashboard login
     # path('', RedirectView.as_view(url='/admindashboard/login/', permanent=False), name='root'),
