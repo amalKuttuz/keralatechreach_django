@@ -1,5 +1,5 @@
-from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import viewsets, filters, generics, permissions
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from admindashboard.models import (
     QuestionPaper,
@@ -9,7 +9,8 @@ from admindashboard.models import (
     Exam,
     EntranceNotification,
     News,
-    Job
+    Job,
+    UserProfile
 )
 from .serializers import (
     QuestionPaperSerializer,
@@ -19,7 +20,8 @@ from .serializers import (
     ExamSerializer,
     EntranceNotificationSerializer,
     NewsSerializer,
-    JobSerializer
+    JobSerializer,
+    UserProfileSerializer
 )
 
 class UniversityViewSet(viewsets.ReadOnlyModelViewSet):
@@ -84,7 +86,6 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
 
 # api/views/auth.py
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
@@ -110,9 +111,24 @@ class RegisterView(generics.CreateAPIView):
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
+        # Fetch the created UserProfile to include in the response
+        user_profile = UserProfile.objects.get(user=user)
+        user_profile_serializer = UserProfileSerializer(user_profile)
+
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "user_profile": user_profile_serializer.data,
             "message": "User created successfully",
             "access": access_token,
             "refresh": refresh_token,
         }, status=status.HTTP_201_CREATED)
+
+# Add User Profile View
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Get the UserProfile object for the current authenticated user
+        return self.request.user.userprofile
