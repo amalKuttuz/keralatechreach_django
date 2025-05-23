@@ -2,11 +2,16 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from .models import (
-    QuestionPaper, University, Degree, Exam, Job, District,
+    QuestionPaper, University, Degree, Exam, Job,
     Initiative, EventCategory, Event, News, ContactMessage,
-    Gallery, SiteSetting, UserProfile, AdSettings
+    Gallery, SiteSetting, UserProfile, AdSettings, ActivityLog
+)
+from keralatechreach.models import (
+    Staff, Question, ApprovedQuestion, NotesUpload, District
 )
 from django.utils.text import slugify
+import re
+from django.core.validators import FileExtensionValidator
 
 class QuestionPaperForm(forms.ModelForm):
     class Meta:
@@ -69,8 +74,9 @@ class JobForm(forms.ModelForm):
 class DistrictForm(forms.ModelForm):
     class Meta:
         model = District
-        fields = ['name', 'is_active']
+        fields = ['district', 'name', 'is_active']
         widgets = {
+            'district': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
@@ -108,6 +114,8 @@ class EventForm(forms.ModelForm):
             'link': forms.URLInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'map_link': forms.URLInput(attrs={'class': 'form-control'}),
+            'district': forms.Select(attrs={'class': 'form-select'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
             'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
@@ -295,4 +303,64 @@ class AdSettingsForm(forms.ModelForm):
             }),
             'location': forms.Select(attrs={'class': 'form-select'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class StaffForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    confirm_password = forms.CharField(widget=forms.PasswordInput())
+
+    class Meta:
+        model = Staff
+        fields = ['username', 'password']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match")
+
+        return cleaned_data
+
+class QuestionForm(forms.ModelForm):
+    file = forms.FileField(
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
+    )
+
+    class Meta:
+        model = Question
+        fields = ['deg', 'subj', 'sem', 'qyear', 'file', 'university', 'status']
+        widgets = {
+            'deg': forms.Select(attrs={'class': 'form-control'}),
+            'subj': forms.TextInput(attrs={'class': 'form-control'}),
+            'sem': forms.TextInput(attrs={'class': 'form-control'}),
+            'qyear': forms.TextInput(attrs={'class': 'form-control'}),
+            'university': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        }
+
+class ApprovedQuestionForm(forms.ModelForm):
+    class Meta:
+        model = ApprovedQuestion
+        fields = ['deg', 'sem', 'subj', 'qtext', 'qyear', 'q_id', 'university']
+        widgets = {
+            'deg': forms.TextInput(attrs={'class': 'form-control'}),
+            'sem': forms.TextInput(attrs={'class': 'form-control'}),
+            'subj': forms.TextInput(attrs={'class': 'form-control'}),
+            'qtext': forms.TextInput(attrs={'class': 'form-control'}),
+            'qyear': forms.NumberInput(attrs={'class': 'form-control'}),
+            'q_id': forms.NumberInput(attrs={'class': 'form-control'}),
+            'university': forms.NumberInput(attrs={'class': 'form-control'})
+        }
+
+class NotesUploadForm(forms.ModelForm):
+    class Meta:
+        model = NotesUpload
+        fields = ['title', 'description', 'file_path', 'status']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'file_path': forms.FileInput(attrs={'class': 'form-control'}),
+            'status': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }

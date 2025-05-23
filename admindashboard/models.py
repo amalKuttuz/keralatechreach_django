@@ -57,12 +57,13 @@ class Job(models.Model):
     def __str__(self):
         return self.title
 
-class District(models.Model):
-    name = models.CharField(max_length=100)
-    is_active = models.BooleanField(default=True)
-    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='created_districts')
-    def __str__(self):
-        return self.name
+# District model moved to keralatechreach/models.py
+# class District(models.Model):
+#     name = models.CharField(max_length=100)
+#     is_active = models.BooleanField(default=True)
+#     created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='created_districts')
+#     def __str__(self):
+#         return self.name
 
 
 class Initiative(models.Model):
@@ -90,7 +91,7 @@ class Event(models.Model):
     link = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     map_link = models.URLField(blank=True, null=True)
-    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True)
+    district = models.ForeignKey('keralatechreach.District', on_delete=models.SET_NULL, null=True, blank=True, related_name='admin_events')
     category = models.ForeignKey(EventCategory, on_delete=models.SET_NULL, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=False)
@@ -189,15 +190,25 @@ class SiteSetting(models.Model):
         return self.key
 
 class UserProfile(models.Model):
-    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    USER_TYPES = [
+        ('student', 'Student'),
+        ('teacher', 'Teacher'),
+        ('admin', 'Admin'),
+        ('staff', 'Staff'),
+        ('guest', 'Guest'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15, blank=True, null=True)
-    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True)
+    district = models.ForeignKey('keralatechreach.District', on_delete=models.SET_NULL, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     bio = models.TextField(blank=True)
     email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    
+    # Standard user status fields
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -206,8 +217,44 @@ class UserProfile(models.Model):
     is_blocked = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     
+    # Enhanced user profile fields
+    user_type = models.CharField(max_length=20, choices=USER_TYPES, default='student')
+    date_of_birth = models.DateField(null=True, blank=True)
+    address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    zip_code = models.CharField(max_length=20, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True, default='India')
+    degree_enrolled = models.ForeignKey(Degree, on_delete=models.SET_NULL, null=True, blank=True, related_name='enrolled_students')
+    semester = models.PositiveIntegerField(null=True, blank=True)
+    graduation_year = models.PositiveIntegerField(null=True, blank=True)
+    
+    # Social media links
+    facebook_url = models.URLField(blank=True, null=True)
+    twitter_url = models.URLField(blank=True, null=True)
+    instagram_url = models.URLField(blank=True, null=True)
+    linkedin_url = models.URLField(blank=True, null=True)
+    
+    # Legacy user fields
+    is_legacy_user = models.BooleanField(default=False)
+    legacy_id = models.IntegerField(null=True, blank=True)
+    legacy_username = models.CharField(max_length=200, blank=True, null=True)
+    
+    # Security and preferences
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    failed_login_attempts = models.PositiveIntegerField(default=0)
+    last_password_change = models.DateTimeField(null=True, blank=True)
+    email_notification_enabled = models.BooleanField(default=True)
+    two_factor_enabled = models.BooleanField(default=False)
+    
     def __str__(self):
         return self.user.username
+    
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            # For new profiles, set last_password_change to now
+            self.last_password_change = timezone.now()
+        super().save(*args, **kwargs)
 
 # Signal to create UserProfile automatically when User is created
 @receiver(post_save, sender=User)
@@ -221,10 +268,10 @@ def create_user_profile(sender, instance, created, **kwargs):
             is_active=instance.is_active
         )
 
+# Signal to save UserProfile when User is updated
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'userprofile'):
-        instance.userprofile.save()
+    instance.userprofile.save()
 
 class ActivityLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

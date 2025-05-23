@@ -1,0 +1,75 @@
+{% extends 'admindashboard/base.html' %}
+{% load static %}
+
+{% block title %}Delete Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Delete Notes</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="icon fas fa-exclamation-triangle"></i> Warning!</h5>
+                        You are about to delete these notes. This action cannot be undone.
+                    </div>
+                    
+                    <div class="card card-outline card-secondary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title">Notes Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-3">Title:</dt>
+                                <dd class="col-sm-9">{{ notes.title }}</dd>
+
+                                <dt class="col-sm-3">Description:</dt>
+                                <dd class="col-sm-9">
+                                    {% if notes.description %}
+                                    {{ notes.description }}
+                                    {% else %}
+                                    <span class="text-muted">No description provided</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-3">Uploaded By:</dt>
+                                <dd class="col-sm-9">{{ notes.uploaded_by.userid }}</dd>
+
+                                <dt class="col-sm-3">Upload Date:</dt>
+                                <dd class="col-sm-9">{{ notes.uploaded_at|date:"Y-m-d H:i" }}</dd>
+
+                                <dt class="col-sm-3">Status:</dt>
+                                <dd class="col-sm-9">
+                                    {% if notes.status %}
+                                    <span class="badge badge-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">Pending</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+
+                            {% if notes.file_path %}
+                            <div class="text-center">
+                                <a href="{{ notes.file_path.url }}" target="_blank" class="btn btn-sm btn-info">
+                                    <i class="fas fa-file"></i> View File
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                        <a href="{% url 'admindashboard:notes_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

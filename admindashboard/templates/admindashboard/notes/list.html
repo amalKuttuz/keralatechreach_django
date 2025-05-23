@@ -1,0 +1,112 @@
+{% extends 'admindashboard/base.html' %}
+{% load static %}
+
+{% block title %}Notes Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Notes Uploads</h3>
+                    <div class="card-tools">
+                        <a href="{% url 'admindashboard:notes_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Add Notes
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status" class="form-control">
+                                        <option value="">All</option>
+                                        <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Uploader</label>
+                                    <select name="uploader" class="form-control">
+                                        <option value="">All</option>
+                                        {% for uploader in uploaders %}
+                                        <option value="{{ uploader.id }}" {% if request.GET.uploader == uploader.id|stringformat:"i" %}selected{% endif %}>{{ uploader.userid }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'admindashboard:notes_list' %}" class="btn btn-secondary">Clear</a>
+                    </form>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Uploaded By</th>
+                                    <th>Upload Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in notes %}
+                                <tr>
+                                    <td>{{ note.id }}</td>
+                                    <td>{{ note.title }}</td>
+                                    <td>
+                                        {% if note.description %}
+                                        {{ note.description|truncatechars:50 }}
+                                        {% else %}
+                                        <span class="text-muted">No description</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ note.uploaded_by.userid }}</td>
+                                    <td>{{ note.uploaded_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        {% if note.status %}
+                                        <span class="badge badge-success">Approved</span>
+                                        {% else %}
+                                        <span class="badge badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'admindashboard:notes_update' note.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a href="{{ note.file_path.url }}" target="_blank" class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-file"></i> View
+                                            </a>
+                                            <a href="{% url 'admindashboard:notes_delete' note.id %}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No notes found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    {% include 'admindashboard/components/pagination.html' with page_obj=page_obj %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

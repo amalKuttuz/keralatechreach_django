@@ -14,7 +14,7 @@
                 <div class="card-body px-0 pb-2">
                     <div class="container">
                         <div class="alert alert-warning" role="alert">
-                            Are you sure you want to delete the district "{{ district.name }}"?
+                            Are you sure you want to delete the district "{{ district.district }}"{% if district.name != district.district %} ({{ district.name }}){% endif %}?
                         </div>
                         <form method="post">
                             {% csrf_token %}

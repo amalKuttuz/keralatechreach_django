@@ -1,0 +1,16 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.keralatechreach.kstudents",
+      "sha256_cert_fingerprints": [
+        " 61:38:C3:90:8E:26:C6:B9:F6:B5:10:9B:C9:54:69:A8:E6:0D:8C:27:F4:87:C5:EF:3D:E4:4B:16:96:FC:88:F4",
+        "48:2B:A8:32:82:35:C2:D9:79:8D:0B:91:09:6B:F7:58:C3:06:1F:CB:40:4E:B8:B3:8B:61:80:75:37:A7:91:B5"
+      ]
+    }
+  }
+]

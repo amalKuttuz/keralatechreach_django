@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from ..models import News, Event, Gallery, EventCategory, District, Initiative
+from ..models import News, Event, Gallery, EventCategory, Initiative
+from keralatechreach.models import District
 from ..forms import NewsForm, EventForm, GalleryForm, EventCategoryForm, DistrictForm, InitiativeForm
 from .activity_log import log_activity
 
@@ -204,7 +205,7 @@ def gallery_delete(request, pk):
 
 @login_required
 def district_list(request):
-    districts = District.objects.all().order_by('name')
+    districts = District.objects.all().order_by('district')
     return render(request, 'admindashboard/districts/list.html', {'districts': districts})
 
 @login_required
@@ -215,6 +216,12 @@ def district_create(request):
             district = form.save(commit=False)
             district.created_by = request.user.userprofile
             district.save()
+            log_activity(
+                user=request.user,
+                action="Created district",
+                details=f"Created district: {district.district}",
+                request=request
+            )
             messages.success(request, 'District created successfully.')
             return redirect('admindashboard:district_list')
     else:
@@ -225,12 +232,18 @@ def district_create(request):
     })
 
 @login_required
-def district_edit(request, pk):
-    district = get_object_or_404(District, pk=pk)
+def district_edit(request, district_id):
+    district = get_object_or_404(District, district_id=district_id)
     if request.method == 'POST':
         form = DistrictForm(request.POST, instance=district)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action="Updated district",
+                details=f"Updated district: {district.district}",
+                request=request
+            )
             messages.success(request, 'District updated successfully.')
             return redirect('admindashboard:district_list')
     else:
@@ -242,10 +255,17 @@ def district_edit(request, pk):
     })
 
 @login_required
-def district_delete(request, pk):
-    district = get_object_or_404(District, pk=pk)
+def district_delete(request, district_id):
+    district = get_object_or_404(District, district_id=district_id)
     if request.method == 'POST':
+        name = district.district
         district.delete()
+        log_activity(
+            user=request.user,
+            action="Deleted district",
+            details=f"Deleted district: {name}",
+            request=request
+        )
         messages.success(request, 'District deleted successfully.')
         return redirect('admindashboard:district_list')
     return render(request, 'admindashboard/districts/delete.html', {'district': district})

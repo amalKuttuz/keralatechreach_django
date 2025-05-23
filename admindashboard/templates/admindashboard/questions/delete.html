@@ -1,0 +1,72 @@
+{% extends 'admindashboard/base.html' %}
+{% load static %}
+
+{% block title %}Delete Question Paper{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Delete Question Paper</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="icon fas fa-exclamation-triangle"></i> Warning!</h5>
+                        You are about to delete this question paper. This action cannot be undone.
+                    </div>
+                    
+                    <div class="card card-outline card-secondary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title">Question Paper Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-3">Degree:</dt>
+                                <dd class="col-sm-9">{{ question.deg }}</dd>
+
+                                <dt class="col-sm-3">Subject:</dt>
+                                <dd class="col-sm-9">{{ question.subj }}</dd>
+
+                                <dt class="col-sm-3">Semester:</dt>
+                                <dd class="col-sm-9">{{ question.sem }}</dd>
+
+                                <dt class="col-sm-3">Year:</dt>
+                                <dd class="col-sm-9">{{ question.qyear }}</dd>
+
+                                <dt class="col-sm-3">University:</dt>
+                                <dd class="col-sm-9">{{ question.university }}</dd>
+
+                                <dt class="col-sm-3">Status:</dt>
+                                <dd class="col-sm-9">
+                                    {% if question.status %}
+                                    <span class="badge badge-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">Pending</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+
+                            {% if question.file %}
+                            <div class="text-center">
+                                <a href="{{ question.file.url }}" target="_blank" class="btn btn-sm btn-info">
+                                    <i class="fas fa-file-pdf"></i> View Question Paper
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                        <a href="{% url 'admindashboard:question_paper_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

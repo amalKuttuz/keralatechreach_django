@@ -1,36 +1,135 @@
 {% extends 'admindashboard/base.html' %}
+{% load static %}
+
+{% block title %}Question Papers{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Questions</h4>
-    <a href="{% url 'question_create' %}" class="btn btn-primary">+ Add Question</a>
-  </div>
-  <table class="table table-bordered">
-    <thead class="table-light">
-      <tr>
-        <th>ID</th>
-        <th>Question Text</th>
-        <th>Created At</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for question in questions %}
-      <tr>
-        <td>{{ question.id }}</td>
-        <td>{{ question.question_text }}</td>
-        <td>{{ question.created_at|date:"Y-m-d H:i" }}</td>
-        <td>
-          <a href="{% url 'question_edit' question.pk %}" class="btn btn-sm btn-warning">Edit</a>
-          <a href="{% url 'question_delete' question.pk %}" class="btn btn-sm btn-danger">Delete</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="4" class="text-center">No questions found.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Question Papers</h3>
+                    <div class="card-tools">
+                        <a href="{% url 'admindashboard:question_paper_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Add Question Paper
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status" class="form-control">
+                                        <option value="">All</option>
+                                        <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>University</label>
+                                    <select name="university" class="form-control">
+                                        <option value="">All</option>
+                                        {% for uni in universities %}
+                                        <option value="{{ uni }}" {% if request.GET.university == uni %}selected{% endif %}>{{ uni }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Degree</label>
+                                    <select name="deg" class="form-control">
+                                        <option value="">All</option>
+                                        {% for degree in degrees %}
+                                        <option value="{{ degree }}" {% if request.GET.deg == degree %}selected{% endif %}>{{ degree }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Semester</label>
+                                    <select name="sem" class="form-control">
+                                        <option value="">All</option>
+                                        {% for sem in semesters %}
+                                        <option value="{{ sem }}" {% if request.GET.sem == sem %}selected{% endif %}>{{ sem }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'admindashboard:question_paper_list' %}" class="btn btn-secondary">Clear</a>
+                    </form>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Degree</th>
+                                    <th>Subject</th>
+                                    <th>Semester</th>
+                                    <th>Year</th>
+                                    <th>University</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for question in questions %}
+                                <tr>
+                                    <td>{{ question.id }}</td>
+                                    <td>{{ question.deg }}</td>
+                                    <td>{{ question.subj }}</td>
+                                    <td>{{ question.sem }}</td>
+                                    <td>{{ question.qyear }}</td>
+                                    <td>{{ question.university }}</td>
+                                    <td>
+                                        {% if question.status %}
+                                        <span class="badge badge-success">Approved</span>
+                                        {% else %}
+                                        <span class="badge badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'admindashboard:question_paper_update' question.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            {% if not question.status %}
+                                            <a href="{% url 'admindashboard:question_paper_approve' question.id %}" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> Approve
+                                            </a>
+                                            {% endif %}
+                                            <a href="{{ question.file.url }}" target="_blank" class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-file-pdf"></i> View
+                                            </a>
+                                            <a href="{% url 'admindashboard:question_paper_delete' question.id %}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No question papers found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    {% include 'admindashboard/components/pagination.html' with page_obj=page_obj %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    QuestionPaper, University, Degree, Exam, Job, District,
+    QuestionPaper, University, Degree, Exam, Job,
     Initiative, EventCategory, Event, News, ContactMessage,
     Gallery, SiteSetting, UserProfile
 )
@@ -36,11 +36,6 @@ class JobAdmin(admin.ModelAdmin):
     list_filter = ('last_date', 'is_published')
     search_fields = ('title', 'description')
     list_editable = ('is_published',)
-
-@admin.register(District)
-class DistrictAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_by')
-    search_fields = ('name',)
 
 @admin.register(Initiative)
 class InitiativeAdmin(admin.ModelAdmin):

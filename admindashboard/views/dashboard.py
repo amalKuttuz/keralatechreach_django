@@ -4,10 +4,11 @@ from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
 from ..models import (
-    QuestionPaper, University, Degree, Exam, Job, District,
+    QuestionPaper, University, Degree, Exam, Job,
     Initiative, EventCategory, Event, News, ContactMessage,
     Gallery, SiteSetting, UserProfile
 )
+from keralatechreach.models import District
 from ..decorators import staff_required
 
 @login_required

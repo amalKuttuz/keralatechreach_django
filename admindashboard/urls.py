@@ -23,6 +23,17 @@ from .views.jobs import job_list, job_create, job_edit, job_delete
 from .views.activity_log import activity_log_view
 from .views.contact_messages import contact_messages, contact_message_detail, contact_message_delete
 from .views.ads import ad_list, ad_create, ad_edit, ad_delete
+from .views.staff import (
+    StaffListView, StaffCreateView, StaffUpdateView, StaffDeleteView
+)
+from .views.questions import (
+    QuestionListView, QuestionCreateView, QuestionUpdateView, 
+    QuestionDeleteView, QuestionApproveView
+)
+from .views.notes import (
+    NotesUploadListView, NotesUploadCreateView, 
+    NotesUploadUpdateView, NotesUploadDeleteView
+)
 
 app_name = 'admindashboard'
 
@@ -115,8 +126,8 @@ urlpatterns = [
     # District URLs
     path('districts/', district_list, name='district_list'),
     path('districts/create/', district_create, name='district_create'),
-    path('districts/<int:pk>/edit/', district_edit, name='district_edit'),
-    path('districts/<int:pk>/delete/', district_delete, name='district_delete'),
+    path('districts/<int:district_id>/edit/', district_edit, name='district_edit'),
+    path('districts/<int:district_id>/delete/', district_delete, name='district_delete'),
     
     # Initiative URLs
     path('initiatives/', initiative_list, name='initiative_list'),
@@ -142,4 +153,23 @@ urlpatterns = [
     path('ads/create/', ad_create, name='ad_create'),
     path('ads/<int:pk>/edit/', ad_edit, name='ad_edit'),
     path('ads/<int:pk>/delete/', ad_delete, name='ad_delete'),
+    
+    # Staff Management URLs
+    path('staff/', StaffListView.as_view(), name='staff_list'),
+    path('staff/add/', StaffCreateView.as_view(), name='staff_create'),
+    path('staff/<int:pk>/edit/', StaffUpdateView.as_view(), name='staff_update'),
+    path('staff/<int:pk>/delete/', StaffDeleteView.as_view(), name='staff_delete'),
+    
+    # Question Management URLs (new implementation for Questions model)
+    path('question-papers/', QuestionListView.as_view(), name='question_paper_list'),
+    path('question-papers/add/', QuestionCreateView.as_view(), name='question_paper_create'),
+    path('question-papers/<int:pk>/edit/', QuestionUpdateView.as_view(), name='question_paper_update'),
+    path('question-papers/<int:pk>/delete/', QuestionDeleteView.as_view(), name='question_paper_delete'),
+    path('question-papers/<int:pk>/approve/', QuestionApproveView.as_view(), name='question_paper_approve'),
+    
+    # Notes Upload URLs
+    path('notes/', NotesUploadListView.as_view(), name='notes_list'),
+    path('notes/add/', NotesUploadCreateView.as_view(), name='notes_create'),
+    path('notes/<int:pk>/edit/', NotesUploadUpdateView.as_view(), name='notes_update'),
+    path('notes/<int:pk>/delete/', NotesUploadDeleteView.as_view(), name='notes_delete'),
 ]

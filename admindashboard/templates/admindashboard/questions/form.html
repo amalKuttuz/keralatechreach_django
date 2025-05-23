@@ -1,20 +1,125 @@
 {% extends 'admindashboard/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <div class="card">
-    <div class="card-header">
-      <h5 class="mb-0">{{ form.instance.pk|yesno:"Edit Question,Add Question" }}</h5>
-    </div>
-    <div class="card-body">
-      <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="mt-3">
-          <button type="submit" class="btn btn-success">Save</button>
-          <a href="{% url 'question_list' %}" class="btn btn-secondary">Cancel</a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ title }}</h3>
+                </div>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Please correct the errors below.
+                        </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.deg.id_for_label }}">Degree</label>
+                                    {{ form.deg|add_class:"form-control" }}
+                                    {% if form.deg.errors %}
+                                    <div class="text-danger">
+                                        {{ form.deg.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.university.id_for_label }}">University</label>
+                                    {{ form.university|add_class:"form-control" }}
+                                    {% if form.university.errors %}
+                                    <div class="text-danger">
+                                        {{ form.university.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.subj.id_for_label }}">Subject</label>
+                                    {{ form.subj|add_class:"form-control" }}
+                                    {% if form.subj.errors %}
+                                    <div class="text-danger">
+                                        {{ form.subj.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.sem.id_for_label }}">Semester</label>
+                                    {{ form.sem|add_class:"form-control" }}
+                                    {% if form.sem.errors %}
+                                    <div class="text-danger">
+                                        {{ form.sem.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.qyear.id_for_label }}">Year</label>
+                                    {{ form.qyear|add_class:"form-control" }}
+                                    {% if form.qyear.errors %}
+                                    <div class="text-danger">
+                                        {{ form.qyear.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.file.id_for_label }}">Question Paper File (PDF)</label>
+                            {{ form.file|add_class:"form-control" }}
+                            {% if form.file.errors %}
+                            <div class="text-danger">
+                                {{ form.file.errors.0 }}
+                            </div>
+                            {% endif %}
+                            {% if form.instance.file %}
+                            <div class="mt-2">
+                                <small class="text-muted">Current file: </small>
+                                <a href="{{ form.instance.file }}" target="_blank">View Current File</a>
+                                <small class="text-muted">(Upload a new file to replace)</small>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.status|add_class:"form-check-input" }}
+                                <label class="form-check-label" for="{{ form.status.id_for_label }}">
+                                    Approved
+                                </label>
+                                {% if form.status.errors %}
+                                <div class="text-danger">
+                                    {{ form.status.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'admindashboard:question_paper_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
-      </form>
     </div>
-  </div>
 </div>
 {% endblock %}

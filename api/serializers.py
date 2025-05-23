@@ -1,8 +1,23 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from admindashboard.models import (
-    QuestionPaper, Job, Event, Initiative, UserProfile, Note, ContactMessage, EntranceNotification,
-    AffiliateCategory, AffiliateBudgetSelection, AffiliateSliderItem, AffiliateProduct
+    QuestionPaper, Job, Initiative, UserProfile, Note,
+    AffiliateCategory, AffiliateBudgetSelection, AffiliateSliderItem, AffiliateProduct,
+    News, Gallery, Exam
+)
+from keralatechreach.models import (
+    University, Degree, District, EventCategory, Event, EventImpression, 
+    Question, ApprovedQuestion, AppVersion, Category, BudgetSelection, 
+    ContactMessage, Slider, Staff, EntranceNotification, 
+    NotesUpload, EventInteraction, Product
+)
+from .models import (
+    AppVersion, 
+    CategoryModel, 
+    BudgetSelection, 
+    SliderItem, 
+    ApprovedQuestion,
+    Product
 )
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,52 +34,110 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'phone', 'district', 'profile_picture', 'bio')
         read_only_fields = ('id',)
 
-class QuestionPaperSerializer(serializers.ModelSerializer):
+class AppVersionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = QuestionPaper
-        fields = ('id', 'degree', 'semester', 'subject', 'file_path', 'year', 
-                 'university_id', 'is_published', 'updated_at')
-        read_only_fields = ('id', 'updated_at')
+        model = AppVersion
+        fields = '__all__'
 
-class JobSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Job
-        fields = ('id', 'title', 'description', 'last_date', 'updated_at', 'is_published')
-        read_only_fields = ('id', 'updated_at')
+        model = Category
+        fields = '__all__'
 
-class EventSerializer(serializers.ModelSerializer):
+class BudgetSelectionSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
     class Meta:
-        model = Event
-        fields = ('id', 'name', 'event_start', 'event_end', 'place', 'link', 
-                 'description', 'map_link', 'district', 'category', 'is_published', 
-                 'updated_at')
-        read_only_fields = ('id', 'updated_at')
-
-class InitiativeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Initiative
-        fields = ('id', 'name', 'description', 'link', 'photo', 'is_published', 
-                 'updated_at')
-        read_only_fields = ('id', 'updated_at')
-
-class NoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note
-        fields = ('id', 'title', 'module', 'degree', 'semester', 'year',
-                  'university', 'file', 'uploaded_by', 'uploaded_at', 'is_published')
-        read_only_fields = ('id', 'uploaded_by', 'uploaded_at', 'is_published')
+        model = BudgetSelection
+        fields = '__all__'
 
 class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactMessage
-        fields = ('id', 'name', 'email', 'subject', 'message')
-        read_only_fields = ('id',)
+        fields = '__all__'
+
+class SliderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SliderItem
+        fields = ['id', 'title', 'image_url', 'redirect_url', 'display_order']
+
+class ProductSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+class QuestionPaperSerializer(serializers.ModelSerializer):
+    degree_name = serializers.CharField(source='degree.name', read_only=True)
+    university_name = serializers.CharField(source='university_id.name', read_only=True)
+    
+    class Meta:
+        model = QuestionPaper
+        fields = ['id', 'degree', 'degree_name', 'semester', 'subject', 'file_path', 'year', 'university_id', 'university_name']
+
+class UniversitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = University
+        fields = '__all__'
+
+class DegreeSerializer(serializers.ModelSerializer):
+    university_name = serializers.CharField(source='university.university_name', read_only=True)
+    
+    class Meta:
+        model = Degree
+        fields = '__all__'
+
+class ExamSerializer(serializers.ModelSerializer):
+    degree_name = serializers.CharField(source='degree_name.name', read_only=True)
+    university_name = serializers.CharField(source='university.name', read_only=True)
+    
+    class Meta:
+        model = Exam
+        fields = ['id', 'exam_name', 'exam_date', 'exam_url', 'degree_name', 'semester', 'admission_year', 'university', 'university_name']
+
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = ['id', 'title', 'description', 'last_date']
+
+class DistrictSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = '__all__'
+
+class InitiativeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Initiative
+        fields = ['id', 'name', 'description', 'link', 'photo']
+
+class EventCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventCategory
+        fields = '__all__'
+
+class EventSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.category', read_only=True)
+    district_name = serializers.CharField(source='district.district', read_only=True)
+    
+    class Meta:
+        model = Event
+        fields = '__all__'
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'slug', 'content', 'excerpt', 'image', 'thumbnail', 'created_at', 'reading_time', 'views_count']
+
+class GallerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gallery
+        fields = ['id', 'title', 'description', 'image', 'created_at']
 
 class EntranceNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EntranceNotification
-        fields = ('id', 'title', 'description', 'deadline', 'link', 'published_date', 'is_published', 'created_by')
-        read_only_fields = ('id', 'published_date', 'is_published', 'created_by')
+        fields = '__all__'
 
 class AffiliateCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,6 +162,18 @@ class AffiliateProductSerializer(serializers.ModelSerializer):
         model = AffiliateProduct
         fields = ('id', 'title', 'description', 'category', 'price', 'image_url', 'affiliate_url', 'affiliate_code', 'rating')
         read_only_fields = ('id',)
+
+class NoteSerializer(serializers.ModelSerializer):
+    uploaded_by_name = serializers.CharField(source='uploaded_by.user.username', read_only=True)
+    degree_name = serializers.CharField(source='degree.name', read_only=True)
+    university_name = serializers.CharField(source='university.name', read_only=True)
+    
+    class Meta:
+        model = Note
+        fields = ('id', 'title', 'module', 'degree', 'degree_name', 'semester', 'year', 
+                 'university', 'university_name', 'file', 'uploaded_by', 'uploaded_by_name', 
+                 'uploaded_at', 'is_published')
+        read_only_fields = ('id', 'uploaded_at')
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -115,4 +200,38 @@ class AnalyticsSerializer(serializers.Serializer):
     total_question_papers = serializers.IntegerField()
     total_jobs = serializers.IntegerField()
     total_events = serializers.IntegerField()
-    total_initiatives = serializers.IntegerField() 
+    total_initiatives = serializers.IntegerField()
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = '__all__'
+
+class ApprovedQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApprovedQuestion
+        fields = '__all__'
+
+class EventImpressionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventImpression
+        fields = '__all__'
+
+class NotesUploadSerializer(serializers.ModelSerializer):
+    uploaded_by_name = serializers.CharField(source='uploaded_by.userid', read_only=True)
+    
+    class Meta:
+        model = NotesUpload
+        fields = '__all__'
+
+class EventInteractionSerializer(serializers.ModelSerializer):
+    event_name = serializers.CharField(source='event.name', read_only=True)
+    
+    class Meta:
+        model = EventInteraction
+        fields = '__all__'
+
+class SliderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Slider
+        fields = ['id', 'title', 'image_url', 'redirect_url', 'display_order'] 

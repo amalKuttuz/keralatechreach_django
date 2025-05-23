@@ -1,0 +1,136 @@
+{% extends 'admindashboard/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Approve Question Paper{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Approve Question Paper</h3>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Please correct the errors below.
+                        </div>
+                        {% endif %}
+
+                        <div class="alert alert-info">
+                            <h5><i class="icon fas fa-info"></i> Approval Process</h5>
+                            You are approving the following question paper. Review the details and make any necessary changes before submitting.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Current Question Preview -->
+                                <div class="card card-secondary">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Original Question</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <dl class="row">
+                                            <dt class="col-sm-4">Degree:</dt>
+                                            <dd class="col-sm-8">{{ question.deg }}</dd>
+                                            
+                                            <dt class="col-sm-4">Subject:</dt>
+                                            <dd class="col-sm-8">{{ question.subj }}</dd>
+                                            
+                                            <dt class="col-sm-4">Semester:</dt>
+                                            <dd class="col-sm-8">{{ question.sem }}</dd>
+                                            
+                                            <dt class="col-sm-4">Year:</dt>
+                                            <dd class="col-sm-8">{{ question.qyear }}</dd>
+                                            
+                                            <dt class="col-sm-4">University:</dt>
+                                            <dd class="col-sm-8">{{ question.university }}</dd>
+                                        </dl>
+                                        <div class="text-center">
+                                            <a href="{{ question.file.url }}" target="_blank" class="btn btn-sm btn-info">
+                                                <i class="fas fa-file-pdf"></i> View Question Paper
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <!-- Approval Form -->
+                                <div class="card card-primary">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Approval Details</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label for="{{ form.deg.id_for_label }}">Degree</label>
+                                            {{ form.deg|add_class:"form-control" }}
+                                            {% if form.deg.errors %}
+                                            <div class="text-danger">
+                                                {{ form.deg.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="{{ form.sem.id_for_label }}">Semester</label>
+                                            {{ form.sem|add_class:"form-control" }}
+                                            {% if form.sem.errors %}
+                                            <div class="text-danger">
+                                                {{ form.sem.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="{{ form.subj.id_for_label }}">Subject</label>
+                                            {{ form.subj|add_class:"form-control" }}
+                                            {% if form.subj.errors %}
+                                            <div class="text-danger">
+                                                {{ form.subj.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="{{ form.qtext.id_for_label }}">Question Text/Reference</label>
+                                            {{ form.qtext|add_class:"form-control" }}
+                                            {% if form.qtext.errors %}
+                                            <div class="text-danger">
+                                                {{ form.qtext.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="{{ form.qyear.id_for_label }}">Year</label>
+                                            {{ form.qyear|add_class:"form-control" }}
+                                            {% if form.qyear.errors %}
+                                            <div class="text-danger">
+                                                {{ form.qyear.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Hidden fields -->
+                                        {{ form.q_id }}
+                                        {{ form.university }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success">Approve Question</button>
+                        <a href="{% url 'admindashboard:question_paper_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
