@@ -253,12 +253,16 @@ class CustomUserChangeForm(UserChangeForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['phone', 'district', 'profile_picture', 'bio', 'email']
+        fields = ['phone', 'district', 'profile_picture', 'bio', 'email', 'working_status', 'course', 'university']
         widgets = {
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'district': forms.Select(attrs={'class': 'form-select'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
             'bio': forms.Textarea(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
+            'working_status': forms.Select(attrs={'class': 'form-select'}),
+            'course': forms.TextInput(attrs={'class': 'form-control'}),
+            'university': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class UserProfileUpdateForm(forms.ModelForm):

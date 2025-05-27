@@ -85,6 +85,39 @@
                                         </div>
                                         {% endif %}
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="my-3">
+                                            <label class="form-label d-block">Working Status</label>
+                                            {{ form.working_status }}
+                                        </div>
+                                        {% if form.working_status.errors %}
+                                        <div class="text-danger">
+                                            {{ form.working_status.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="input-group input-group-outline my-3 {% if form.course.value %}is-filled{% endif %}">
+                                            <label class="form-label">Course</label>
+                                            {{ form.course }}
+                                        </div>
+                                        {% if form.course.errors %}
+                                        <div class="text-danger">
+                                            {{ form.course.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="input-group input-group-outline my-3 {% if form.university.value %}is-filled{% endif %}">
+                                            <label class="form-label">University</label>
+                                            {{ form.university }}
+                                        </div>
+                                        {% if form.university.errors %}
+                                        <div class="text-danger">
+                                            {{ form.university.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12 text-center mt-4">

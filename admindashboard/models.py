@@ -22,7 +22,7 @@ class QuestionPaper(models.Model):
     
 class University(models.Model):
     name = models.CharField(max_length=200)
-    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    created_by = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='created_universities')
 
     def __str__(self):
         return self.name
@@ -210,6 +210,13 @@ class SiteSetting(models.Model):
         return self.key
 
 class UserProfile(models.Model):
+    WORKING_STATUS_CHOICES = [
+        ('employed', 'Employed'),
+        ('business', 'Business'),
+        ('student', 'Student'),
+        ('unemployed', 'Unemployed'),
+    ]
+
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
     phone = models.CharField(max_length=15, blank=True, null=True)
     district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True)
@@ -226,6 +233,16 @@ class UserProfile(models.Model):
     is_approved = models.BooleanField(default=False)
     is_blocked = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
+    
+    # New fields
+    working_status = models.CharField(
+        max_length=20,
+        choices=WORKING_STATUS_CHOICES,
+        blank=True,
+        null=True
+    )
+    course = models.CharField(max_length=255, blank=True, null=True)
+    university = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return self.user.username

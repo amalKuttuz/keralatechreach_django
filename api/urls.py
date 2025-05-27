@@ -12,7 +12,10 @@ from .views import (
     RegisterView,
     NewsViewSet,
     JobViewSet,
-    UserProfileView
+    UserProfileView,
+    DistrictViewSet,
+    EventViewSet,
+    EventCategoryViewSet
 )
 
 router = DefaultRouter()
@@ -24,6 +27,11 @@ router.register(r'exams', ExamViewSet)
 router.register(r'entrance-notifications', EntranceNotificationViewSet)
 router.register(r'news', NewsViewSet)
 router.register(r'jobs', JobViewSet)
+router.register(r'districts', DistrictViewSet)
+
+# Register Event ViewSets
+router.register(r'events', EventViewSet)
+router.register(r'event-categories', EventCategoryViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

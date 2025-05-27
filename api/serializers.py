@@ -10,7 +10,9 @@ from admindashboard.models import (
     Job,
     NewsCategory,
     UserProfile,
-    District
+    District,
+    Event,
+    EventCategory
 )
 
 # Keep the necessary imports for the auth serializers
@@ -21,6 +23,12 @@ from django.contrib.auth.models import User # Explicitly import User if needed
 
 # User model might be defined here or imported from django.contrib.auth
 # Assuming User is correctly defined or imported elsewhere if get_user_model() is used.
+
+# Add District Serializer
+class DistrictSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = ['id', 'name']
 
 class UniversitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -170,7 +178,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'phone', 'district', 
             'profile_picture', 'bio', 'is_active', 'is_verified',
-            'is_approved', # Include other relevant read-only fields as needed
+            'is_approved', 'working_status', 'course', 'university', # Add new fields
         ]
         read_only_fields = [
              'id', 'username', 'email', 'profile_picture', 'is_active', 
@@ -190,3 +198,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
     #     #     setattr(user, attr, value)
     #     # user.save()
     #     return instance
+
+# Add EventCategory Serializer
+class EventCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventCategory
+        fields = ['id', 'category']
+
+# Add Event Serializer
+class EventSerializer(serializers.ModelSerializer):
+    category = EventCategorySerializer(read_only=True) # Serialize the category details
+    district = DistrictSerializer(read_only=True) # Serialize the district details
+
+    class Meta:
+        model = Event
+        fields = [
+            'id', 'name', 'event_start', 'event_end', 
+            'place', 'link', 'description', 'map_link', 
+            'district', 'category', 'is_published'
+        ]

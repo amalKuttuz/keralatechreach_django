@@ -100,6 +100,14 @@
           </a>
         </li>
         <li class="nav-item mb-2">
+          <a class="nav-link {% if 'eventcategory' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:event_category_list' %}">
+            <div class="text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-symbols-rounded opacity-10">category</i>
+            </div>
+            <span class="nav-link-text ms-1">Event Categories</span>
+          </a>
+        </li>
+        <li class="nav-item mb-2">
           <a class="nav-link {% if 'job' in request.resolver_match.url_name %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}" href="{% url 'admindashboard:job_list' %}">
             <div class="text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-symbols-rounded opacity-10">work</i>

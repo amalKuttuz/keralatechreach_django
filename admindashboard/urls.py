@@ -10,6 +10,7 @@ from .views.academic import (
 from .views.content import (
     news_list, news_create, news_edit, news_delete,
     event_list, event_create, event_edit, event_delete,
+    event_category_list, event_category_create, event_category_edit, event_category_delete,
     gallery_list, gallery_create, gallery_edit, gallery_delete,
     district_list, district_create, district_edit, district_delete,
     initiative_list, initiative_create, initiative_edit, initiative_delete
@@ -105,6 +106,12 @@ urlpatterns = [
     path('events/create/', event_create, name='event_create'),
     path('events/<int:pk>/edit/', event_edit, name='event_edit'),
     path('events/<int:pk>/delete/', event_delete, name='event_delete'),
+    
+    # Event Category URLs
+    path('event-categories/', event_category_list, name='event_category_list'),
+    path('event-categories/create/', event_category_create, name='event_category_create'),
+    path('event-categories/<int:pk>/edit/', event_category_edit, name='event_category_edit'),
+    path('event-categories/<int:pk>/delete/', event_category_delete, name='event_category_delete'),
     
     # News URLs
     path('news/', news_list, name='news_list'),

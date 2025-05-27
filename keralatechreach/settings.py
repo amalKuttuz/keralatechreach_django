@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config # Import config from decouple
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,23 +22,14 @@ import os
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h1lq8-ei0s#**2-%1(*1&)2=27ex)#c4iyv(=g@e@#k1s59rm1'
+SECRET_KEY = config('SECRET_KEY') # Load SECRET_KEY from environment or .env
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool) # Load DEBUG, default to False, cast to boolean
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = [
-    'lms.keralify.com',
-    'localhost',
-    '127.0.0.1',
-    'keralify.com',
-    'www.keralify.com',
-    'keralatechreach.in',
-    'www.keralatechreach.in',
-    '192.168.3.123',  # Adding your physical device IP
-    '*'  # This will allow all hosts - only use during development!
-]
+# Load ALLOWED_HOSTS from environment or .env, split by comma, default to empty list
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=lambda v: [s.strip() for s in v.split(',')] if v else [])
 
 
 # Application definition
@@ -53,10 +45,11 @@ INSTALLED_APPS = [
     'admindashboard',
     'publicpage',
     'widget_tweaks',
-
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -128,7 +121,8 @@ USE_I18N = True
 USE_TZ = True
 
 # settings.py
-API_SECRET_KEY = '7f2ff333-df7e-4f59-be36-f2d7f6ed230f'  # Load from .env in production!
+# Load API_SECRET_KEY from environment or .env
+API_SECRET_KEY = config('API_SECRET_KEY') # Load from .env in production!
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
@@ -151,14 +145,120 @@ SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'keralify.com'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'noreply@keralify.com'  # Replace with your Gmail address
-EMAIL_HOST_PASSWORD = 'Asha@2006'  # Replace with your app-specific password
-EMAIL_USE_SSL = True
-EMAIL_TIMEOUT = 10
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool) # Correct default for TLS
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS settings (added for django-cors-headers)
+# You might want to restrict this in production
+CORS_ALLOW_ALL_ORIGINS = True # Consider using CORS_ALLOWED_ORIGINS in production
+
+# Security Settings (Enhanced)
+# Ensure these are appropriate for your production environment
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+# Set this if you are behind a proxy that sets the X-Forwarded-Proto header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=0, cast=int) # Set to a high value (e.g., 31536000 for 1 year) in production
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False, cast=bool)
+SECURE_HSTS_PRELOAD = config('SECURE_HSTS_PRELOAD', default=False, cast=bool)
+
+SECURE_BROWSER_XSS_FILTER = config('SECURE_BROWSER_XSS_FILTER', default=True, cast=bool) # Deprecated in Django 5+, but good practice to be aware
+SECURE_CONTENT_TYPE_NOSNIFF = config('SECURE_CONTENT_TYPE_NOSNIFF', default=True, cast=bool)
+
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool) # Set to True in production with HTTPS
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool) # Set to True in production with HTTPS
+
+# Logging configuration (Enhanced)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'), # Log file path
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'], # Log to console and file
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        # Add loggers for your apps (e.g., 'admindashboard', 'api', 'publicpage')
+        'admindashboard': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'api': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'publicpage': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# REST Framework settings (added for API)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # Use TokenAuthentication or JWTAuthentication for API auth
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny', # Default to allowing any access
+        # Consider using 'rest_framework.permissions.IsAuthenticated' for protected endpoints
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day', # Example: 100 requests per day for anonymous users
+        'user': '1000/day', # Example: 1000 requests per day for authenticated users
+        # Define custom rates as needed
+        'burst': '10/s', # Example for burst rate limiting
+        'sustained': '1000/day', # Example for sustained rate limiting
+    },
+
+    # Configure the custom exception handler
+    'EXCEPTION_HANDLER': 'api.views.custom_exception_handler'
+}
